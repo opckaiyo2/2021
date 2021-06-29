@@ -100,7 +100,7 @@ def main():
 
                 
             except KeyboardInterrupt:
-                pass
+                break
             except Exception as e:
                 print("\n")
                 print("main.py main try error : ",e)
