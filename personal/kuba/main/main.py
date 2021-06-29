@@ -7,6 +7,7 @@ sys.path.append("/home/pi/2021/kuba/my_mod")
 from my_serial import my_serial
 
 if __name__ == "__main__":
+    #git test commit
     serial = my_serial()
 
     try:
