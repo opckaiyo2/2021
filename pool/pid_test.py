@@ -7,7 +7,7 @@ import sys
 sys.path.append("/home/pi/2021/pool/my_mod")
 from motor_controller import Motor
 
-class PID_FIX:
+class PID_yaw:
   def __init__(self):
     self.e = 0
     self.e1 = 0
@@ -76,39 +76,46 @@ class PID_FIX:
       
     return direction 
 
+class PID_depth:
+  def __init__(self):
+    self.e = 0
+    self.e1 = 0
+    self.e2 = 0
+    self.M = 0
+    self.M1 = 0
 
-def fix_depth(depth2goal, depth_now, correct_depth):
+  def fix_depth(self,depth2goal, depth_now, correct_depth):
 
-  M = 0.00
-  M1 = 0.00
-  e = 0.00
-  e1 = 0.00
-  e2 = 0.00
-  #Kp = 0.1
-  #Ki = 0.01
-  #Kd = 0.001
+    M = 0.00
+    M1 = 0.00
+    e = 0.00
+    e1 = 0.00
+    e2 = 0.00
+    #Kp = 0.1
+    #Ki = 0.01
+    #Kd = 0.001
 
-  Kp = 0.001
-  Ki = 0.01
-  Kd = 0.5
+    Kp = 0.001
+    Ki = 0.01
+    Kd = 0.5
 
-  while True:
-    max_correctVal = 10
-    e = abs(depth2goal.value - depth_now.value)
+    while True:
+      max_correctVal = 10
+      self.e = abs(depth2goal.value - depth_now.value)
 
-    M = M1 + Kp * (e-e1) + Ki * e + Kd * ((e-e1) - (e1-e2))
+      self.M = self.M1 + Kp * (self.e-self.e1) + Ki * self.e + Kd * ((self.e-self.e1) - (self.e1-self.e2))
 
-    if M > max_correctVal:
-      M = max_correctVal
-    elif M < 0:
-      M = 0
+      if self.M > max_correctVal:
+        self.M = max_correctVal
+      elif self.M < 0:
+        self.M = 0
 
-    correct_depth.value = int(M)
+      correct_depth.value = int(self.M)
 
-    M1 = M
-    e1 = e
-    e2 = e1
-    time.sleep(0.5)
+      self.M1 = self.M
+      self.e1 = self.e
+      self.e2 = self.e1
+      time.sleep(0.5)
 
 
 
@@ -121,7 +128,7 @@ if __name__ == '__main__':
   max_correct = 30
   correct_yaw = 0
 
-  pid = PID_FIX()
+  pid = PID_yaw()
 
   while(True):
     ser = serial.Serial('/dev/ttyACM0', 9600)
