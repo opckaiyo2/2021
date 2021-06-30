@@ -12,6 +12,7 @@ class test2():
 
 if __name__ == "__main__":
     serial = my_serial()
+    print("test")
 
     try:
         dict_sen = serial.recive_date()
