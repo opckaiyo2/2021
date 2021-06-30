@@ -6,12 +6,13 @@ import os
 sys.path.append("/home/pi/2021/kuba/my_mod")
 from my_serial import my_serial
 
-class test():
+class test2():
     def __init__(self):
         pass
 
 if __name__ == "__main__":
     serial = my_serial()
+    print("test")
 
     try:
         dict_sen = serial.recive_date()
