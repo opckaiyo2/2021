@@ -50,13 +50,13 @@ class PID_yaw:
     self.M1 = self.M
     #time.sleep(1.0)
 
-    """
+    #"""
     print("目標 : " + str(yaw2goal))
     print("現在 : " + str(yaw_now))
     print("操作量 : " + str(self.M))
     print("方向+操作量 : " + str(correct_yaw))
     print("")
-    """
+    #"""
 
     print("M : ",self.M)
     motor.turn(self.M)
