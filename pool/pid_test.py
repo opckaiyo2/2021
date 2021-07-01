@@ -19,7 +19,7 @@ class PID_yaw:
     motor = Motor()
 
     #"""
-    Kp = 0.1
+    Kp = 0.5
     Ki = 0.01
     Kd = 0.001
     """
@@ -124,7 +124,6 @@ class PID_depth:
 
 
 if __name__ == '__main__':
-  #;alskfjbvsanfruv haspfvnjhspfrvna
   motor = Motor()
 
   yam2goal = 0
