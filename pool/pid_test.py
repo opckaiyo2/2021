@@ -18,11 +18,11 @@ class PID_yaw:
   def fix_yaw(self,yaw2goal, yaw_now, max_correct, correct_yaw):
     motor = Motor()
 
-    """
+    #"""
     Kp = 0.1
     Ki = 0.01
     Kd = 0.001
-    #"""
+    """
     Kp = 0.001
     Ki = 0.01
     Kd = 0.5
@@ -50,12 +50,15 @@ class PID_yaw:
     self.M1 = self.M
     #time.sleep(1.0)
 
+    """
     print("目標 : " + str(yaw2goal))
     print("現在 : " + str(yaw_now))
     print("操作量 : " + str(self.M))
     print("方向+操作量 : " + str(correct_yaw))
     print("")
+    """
 
+    print("M : ",self.M)
     motor.turn(self.M)
 
 
@@ -137,7 +140,7 @@ if __name__ == '__main__':
       try:
         String_data = ser.readline().decode('utf-8').rstrip()
         dic_date = ast.literal_eval(String_data)
-        print(dic_date)
+        #print(dic_date)
         yaw_now = int(dic_date["yaw"])
         break
 
