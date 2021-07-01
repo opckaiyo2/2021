@@ -17,6 +17,7 @@ import sys
 
 class PID_yaw:
     def __init__(self):
+        # インスタンス変数定義
         self.M = 0.00
         self.M1 = 0.00
 
@@ -30,32 +31,40 @@ class PID_yaw:
 
     def go_yaw(self, goal, data, MV):
 
+        # センサから得た現在の方向
         now_yaw = data
 
+        # 計算ように-180~180だったデータを0-359に 現在の方向
         if now_yaw < 0:
             now_yaw = 360 + now_yaw
 
+        # 計算ように-180~180だったデータを0-359に 目標の方向
         if goal < 0:
             goal = 360 + goal
 
+        # pid制御は前回の制御を覚えるため値の更新
         self.M1 = self.M
         self.e1 = self.e
         self.e2 = self.e1
 
+        # 目標と現在の差を180未満にする処理(右回り左回りに関係する)
         if abs(goal - now_yaw) > 180:
             self.e = 360 - abs(goal - now_yaw)
         else:
             self.e = abs(goal - now_yaw)
 
+        # pid制御量決定
         self.M = self.M1 + self.Kp * (self.e-self.e1) + self.Ki * self.e + self.Kd * ((self.e-self.e1) - (self.e1-self.e2))
+        # 右回り左回り決定
         direction = self.roteto(now_yaw,goal)
 
-        # 上限値
+        # モータの回転数制限(電流値関係)
         if self.M > 30:
             self.M = 30
         elif self.M < 0:
             self.M = 0
 
+        # 制御量と制御方向を決定
         MV = self.M * direction
         return MV
 

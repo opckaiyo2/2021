@@ -3,6 +3,7 @@ import ast
 import datetime
 import serial
 
+sys.path.append("/home/pi/2021/pool/my_mod")
 from motor_controller import Motor
 
 #--------------------------------

@@ -11,17 +11,15 @@ from multiprocessing import Process, Manager, Value
 
 # 自作関数の場所をsystempathに追加
 sys.path.append("/home/pi/2021/main/my_mod")
-# arduinoとシリアル通信
+# arduinoとシリアル通信　済
 from my_ard import get_sen
 # gpsのデータ取得
 from my_gps import get_gps
-# motor制御
+# motor制御　済
 from my_motor import Motor
-# 姿勢制御
-from my_balance import PID_yaw, PID_depth
-# カメラ制御
+# カメラ制御　済
 from my_camera import cap_main
-# logテキスト作成
+# logテキスト作成　済
 from my_log import log_txt
 
 # Teaching
@@ -37,7 +35,7 @@ INI_FILE = "/home/pi/2021/main/config/config.ini"
 inifile = configparser.SafeConfigParser()
 inifile.read(INI_FILE)
 
-operation = inifile.getint("default", "operation")
+operation = inifile.getint("main", "operation")
 
 # 設定ファイル読み込み-------------------------------------------
 
@@ -76,41 +74,34 @@ def main():
         log_process.start()
 
         # 必要な機能のオブジェクト作成
+        # main.pyの中でモータは制御しないつもりだが緊急停止用
         motor = Motor()
-        pid_yaw = PID_yaw()
-        pid_depth = PID_depth()
 
+        try:
+            # どの操作方法で動かすか---------------------------------
+            
+            if(operation == 1):
+                Teaching()
+            elif(operation == 2):
+                Autonomy()
+            elif(operation == 3):
+                Manual()
+            else:
+                #例外発生分except Exception as eでエラーが検出される
+                raise ValueError("The operation setting value in config.ini is wrong.")
 
-        #main loop
-        while(True):
-            try:
-                # どの操作方法で動かすか---------------------------------
-                
-                if(operation == 1):
-                    Teaching()
-                elif(operation == 2):
-                    Autonomy()
-                elif(operation == 3):
-                    Manual()
-                else:
-                    raise ValueError("The operation setting value in config.ini is wrong.")
-
-                # どの操作方法で動かすか---------------------------------
-
-
-                
-            except KeyboardInterrupt:
-                break
-            except Exception as e:
-                print("\n")
-                print("main.py main try error : ",e)
-                print("\n")
+            # どの操作方法で動かすか---------------------------------
+            
+        except KeyboardInterrupt:
+            motor.stop()
+        except Exception as e:
+            motor.stop()
+            print("\n")
+            print("main.py main try error : ",e)
+            print("\n")
 
 
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except:
-        pass
+    main()

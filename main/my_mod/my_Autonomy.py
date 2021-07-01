@@ -15,8 +15,8 @@ def Autonomy(ard_data, gps_data):
     inifile = configparser.SafeConfigParser()
     inifile.read(INI_FILE)
 
-    gps_flag = inifile.get("default", "gps_flag")
-    gps_initial = inifile.get("default", "gps_initial")
+    gps_flag = inifile.get("operation", "gps_flag")
+    gps_initial = inifile.get("operation", "gps_initial")
 
     gps_initial = ast.literal_eval(gps_initial)
 
