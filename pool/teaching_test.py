@@ -66,6 +66,12 @@ with Manager() as manager:
     isPid_updown = False
 
     threshold_rot = [0, 0, 0, 0, 0, 0, 0]
+    front_right_rot = [0, 0, 0, 0, 0, 0, 0]
+    front_left_rot = [0, 0, 0, 0, 0, 0, 0]
+    back_right_rot = [0, 0, 0, 0, 0, 0, 0]
+    back_left_rot = [0, 0, 0, 0, 0, 0, 0]
+    center_right_rot = [0, 0, 0, 0, 0, 0, 0]
+    center_left_rot = [0, 0, 0, 0, 0, 0, 0]
 
     forward_base_speed = 70
     max_correct_yaw.value = 20
