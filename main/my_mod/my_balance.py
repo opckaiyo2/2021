@@ -17,6 +17,15 @@ import sys
 
 class PID_yaw:
     def __init__(self):
+        # 設定ファイル読み込み-------------------------------------------
+        INI_FILE = "/home/pi/2021/main/config/config.ini"
+        inifile = configparser.SafeConfigParser()
+        inifile.read(INI_FILE)
+
+        yaw_pid = inifile['yaw_pid']
+        depth_pid = inifile['depth_pid']
+        # 設定ファイル読み込み-------------------------------------------
+
         # インスタンス変数定義
         self.M = 0.00
         self.M1 = 0.00
@@ -25,9 +34,9 @@ class PID_yaw:
         self.e1 = 0.00
         self.e2 = 0.00
 
-        self.Kp = 0.001
-        self.Ki = 0.01
-        self.Kd = 0.5
+        self.Kp = yaw_pid.get('Kp')
+        self.Ki = yaw_pid.get('Ki')
+        self.Kd = yaw_pid.get('Kd')
 
     def go_yaw(self, goal, data, MV):
 
@@ -91,24 +100,16 @@ class PID_yaw:
 
 class PID_depth:
     def __init__(self):
-        self.M = 20.00
+        self.M = 0.00
         self.M1 = 0.00
 
         self.e = 0.00
         self.e1 = 0.00
         self.e2 = 0.00
 
-        # self.Kp = 0.1
-        # self.Ki = 0.5
-        # self.Kd = 10
-
-        self.Kp = 0.5
-        self.Ki = 0.003
-        self.Kd = 0.01
-
-        # self.Kp = 0.2
-        # self.Ki = 0.05
-        # self.Kd = 0.05
+        self.Kp = depth_pid.get('Kp')
+        self.Ki = depth_pid.get('Ki')
+        self.Kd = depth_pid.get('Kd')
 
     def go_depth(self, goal, data, MV):
         # 初期値
