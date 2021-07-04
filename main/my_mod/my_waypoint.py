@@ -1,14 +1,13 @@
 import math
 from pyproj import Geod
 
-def waypoint(**location,**goal):
+def waypoint(**gps):
     # gpsと現在地の緯度、経度から距離、方位角、反方位角を求める
-    p1_latitude = location["lat"]
-    p1_longitude = location["lon"]
+    p1_latitude = gps["s_lat"]
+    p1_longitude = gps["s_lon"]
 
-    obj_latitude = goal["lat"]
-    obj_longitude = goal["lon"]
-    obj_altitude = 1000 # 単位は(m)
+    obj_latitude = gps["g_lat"]
+    obj_longitude = gps["g_lon"]
 
     g = Geod(ellps='WGS84')
 

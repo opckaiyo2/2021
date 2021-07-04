@@ -6,6 +6,8 @@ import configparser
 sys.path.append("/home/pi/2021/main/my_mod")
 # motor制御
 from my_motor import Motor
+# gpsのデータから目的地までの角度と距離の差異を計算する
+from my_waypoint import waypoint
 
 def Autonomy(ard_data, gps_data):
 
@@ -20,6 +22,8 @@ def Autonomy(ard_data, gps_data):
 
     gps_initial = ast.literal_eval(gps_initial)
 
+    pid_flag = inifile.get("operation", "pid_flag")
+
     # 設定ファイル読み込み-------------------------------------------
 
 
@@ -28,21 +32,9 @@ def Autonomy(ard_data, gps_data):
 
     # gpsによる初期位置修正----------------------------------------------
 
-    gps_error = 10
-
-    if(gps_flag == 1):
-        while(abs(gps_data["lat"]-gps_initial["lat"]) > gps_error or abs(gps_data["lon"]-gps_initial["lon"]) > gps_error):
-            if(gps_data["lat"] < (gps_initial["lat"] - gps_error)):
-                pass
-
-            elif(gps_data["lat"] > (gps_initial["lat"] + gps_error)):
-                pass
-
-            if(gps_data["lon"] < (gps_initial["lon"] - gps_error)):
-                pass
-
-            elif(gps_data["lon"] > (gps_data["lon"] + gps_error)):
-                pass
+    if(gps_flag):
+        while(True):
+            waypoint()
 
     # gpsによる初期位置修正----------------------------------------------
 
