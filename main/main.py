@@ -59,13 +59,13 @@ def main():
 
         # 各プロセスオブジェクト作成
         # ardからデータ取得
-        ard_process = Process(target=get_sen, daemon=True, args=(ard_data))
+        ard_process = Process(target=get_sen, daemon=True, args=(ard_data,))
         # gpsからデータ取得
-        gps_process = Process(target=get_gps, daemon=True, args=(gps_data))
+        gps_process = Process(target=get_gps, daemon=True, args=(gps_data,))
         # カメラ
-        camera_process = Process(traget=cap_main, daemon=True, args=(hoop_Coordinate))
+        camera_process = Process(traget=cap_main, daemon=True, args=(hoop_Coordinate,))
         # データログ
-        log_process = Process(target=log_txt, daemon=True, args=(ard_data, gps_data))
+        log_process = Process(target=log_txt, daemon=True, args=(ard_data, gps_data,))
 
         # 各プロセススタート
         ard_process.start()
