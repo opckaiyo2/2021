@@ -4,7 +4,7 @@ import ast
 import time
 
 # GPSのデータを取得して還す
-def get_gps(gps_data):
+def get_gps(sen_data):
     session = gps.gps("localhost", "2947")
     session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
     lat = ""
@@ -25,8 +25,7 @@ def get_gps(gps_data):
                     alt = float(report.alt)
                 if( lat!=""and lon!="" and alt!="" ):
                     gps_data_dict = {"lat":lat, "lng":lon, "alt":alt}
-                    gps_data_dict["datetime"] = str(datetime.now())
-                    gps_data = gps_data_dict
+                    sen_data.update(gps_data_dict)
         except KeyError:
                 pass
         except KeyboardInterrupt:

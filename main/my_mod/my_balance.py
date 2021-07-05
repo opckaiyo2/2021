@@ -1,4 +1,5 @@
 #coding: utf-8
+import configparser
 import numpy as np
 import time
 import sys
@@ -23,7 +24,6 @@ class PID_yaw:
         inifile.read(INI_FILE)
 
         yaw_pid = inifile['yaw_pid']
-        depth_pid = inifile['depth_pid']
         # 設定ファイル読み込み-------------------------------------------
 
         # インスタンス変数定義
@@ -38,7 +38,7 @@ class PID_yaw:
         self.Ki = yaw_pid.get('Ki')
         self.Kd = yaw_pid.get('Kd')
 
-    def go_yaw(self, goal, data, MV):
+    def go_yaw(self, goal, data):
 
         # センサから得た現在の方向
         now_yaw = data
@@ -100,6 +100,14 @@ class PID_yaw:
 
 class PID_depth:
     def __init__(self):
+        # 設定ファイル読み込み-------------------------------------------
+        INI_FILE = "/home/pi/2021/main/config/config.ini"
+        inifile = configparser.SafeConfigParser()
+        inifile.read(INI_FILE)
+
+        depth_pid = inifile['depth_pid']
+        # 設定ファイル読み込み-------------------------------------------
+
         self.M = 0.00
         self.M1 = 0.00
 
@@ -111,7 +119,7 @@ class PID_depth:
         self.Ki = depth_pid.get('Ki')
         self.Kd = depth_pid.get('Kd')
 
-    def go_depth(self, goal, data, MV):
+    def go_depth(self, goal, data):
         # 初期値
         depth_zero = data
 

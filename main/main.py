@@ -50,22 +50,20 @@ def main():
     with Manager() as manager:
 
         # プロセス間の通信設定
-        # gpsデータ格納用
-        gps_data = manager.dict()
-        # ardデータ格納用
-        ard_data = manager.dict()
+        # ard_senser,gpsデータ格納用
+        sen_data = manager.dict()
         # 知能計測チャレンジ フラフープ中心座標
         hoop_Coordinate = manager.dict()
 
         # 各プロセスオブジェクト作成
         # ardからデータ取得
-        ard_process = Process(target=get_sen, daemon=True, args=(ard_data,))
+        ard_process = Process(target=get_sen, daemon=True, args=(sen_data,))
         # gpsからデータ取得
-        gps_process = Process(target=get_gps, daemon=True, args=(gps_data,))
+        gps_process = Process(target=get_gps, daemon=True, args=(sen_data,))
         # カメラ
         camera_process = Process(traget=cap_main, daemon=True, args=(hoop_Coordinate,))
         # データログ
-        log_process = Process(target=log_txt, daemon=True, args=(ard_data, gps_data,))
+        log_process = Process(target=log_txt, daemon=True, args=(sen_data,))
 
         # 各プロセススタート
         ard_process.start()
@@ -83,7 +81,7 @@ def main():
             if(operation == 1):
                 Teaching()
             elif(operation == 2):
-                Autonomy()
+                Autonomy(sen_data)
             elif(operation == 3):
                 Manual()
             else:

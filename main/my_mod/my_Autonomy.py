@@ -8,8 +8,10 @@ sys.path.append("/home/pi/2021/main/my_mod")
 from my_motor import Motor
 # gpsのデータから目的地までの角度と距離の差異を計算する
 from my_waypoint import waypoint
+# pid制御
+from my_balance import PID_yaw,PID_depth
 
-def Autonomy(ard_data, gps_data):
+def Autonomy(sen_data):
 
     # 設定ファイル読み込み-------------------------------------------
 
@@ -27,6 +29,8 @@ def Autonomy(ard_data, gps_data):
     # 設定ファイル読み込み-------------------------------------------
 
 
+    pid_yaw = PID_yaw()
+    pid_depth = PID_depth()
     motor = Motor()
 
 
@@ -34,9 +38,21 @@ def Autonomy(ard_data, gps_data):
 
     if(gps_flag):
         while(True):
-            waypoint()
+            gps = waypoint(sen_data["lat"], sen_data["lon"],
+                        gps_initial["lat"], gps_initial["lon"])
+            if(gps["distance_2d"] < 10):
+                break
 
     # gpsによる初期位置修正----------------------------------------------
+
+
+    # senser,pidを用いた初期向き設定---------------------------------
+
+    if(pid_flag):
+        while(True):
+            pid_yaw.go_yaw()
+
+    # senser,pidを用いた初期向き設定---------------------------------
 
 
     # gpsによる潜水地点まで----------------------------------------------

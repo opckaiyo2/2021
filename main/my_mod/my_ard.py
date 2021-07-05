@@ -2,7 +2,7 @@ import ast
 import serial
 import multiprocessing 
 
-def get_sen(ard_data):
+def get_sen(sen_data):
     # arduinoのピン通信速度設定
     ser = serial.Serial('/dev/ttyACM0', 9600)
     
@@ -13,7 +13,7 @@ def get_sen(ard_data):
             # 文字型から辞書型に変換
             dic_date = ast.literal_eval(String_data)
             # multiprocessでprocess間値共有 main.pyで設定
-            ard_data = dic_date
+            sen_data = dic_date
         except KeyboardInterrupt as key:
             break
 
