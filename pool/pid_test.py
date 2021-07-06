@@ -59,7 +59,7 @@ class PID_yaw:
     #"""
 
     print("M : ",self.M)
-    motor.turn(self.M)
+    motor.turn(correct_yaw)
 
 
   def turn_dir(self,yaw_now, goal2yaw):

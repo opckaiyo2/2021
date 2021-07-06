@@ -98,8 +98,8 @@ with Manager() as manager:
         print("set start value")
         log_data = sort_data(axis_data, ard_data)
         yaw2goal.value = log_data['ard_deg']['yaw']
-        start_depth = log_data['depth']
-        depth2goal.value = start_depth
+        #start_depth = log_data['depth']
+        #depth2goal.value = start_depth
 
       elif status == 1:
        # print("correct_yaw", correct_yaw.value)

@@ -36,21 +36,40 @@ def Autonomy(sen_data):
 
     # gpsによる初期位置修正----------------------------------------------
 
+    # config.iniのgpsフラグを1にしたら
     if(gps_flag):
         while(True):
+            # gpsとconfig.iniの初期位置比較
             gps = waypoint(sen_data["lat"], sen_data["lon"],
                         gps_initial["lat"], gps_initial["lon"])
-            if(gps["distance_2d"] < 10):
+            
+            # 初期位置との誤差が2mいないだったら位置調整終了(gps_datasheetより誤差2m)
+            if(gps["distance_2d"] < 2):
                 break
+            
+            # まずは角度調整,角度調節せず直進すると明後日の方向に
+            while((gps["azimuth"]-sen_data["yaw"]) > 5):
+                MV = pid_yaw.go_yaw(sen_data[""])
+                motor.spinturn(MV)
+
+            # 直進 進む強さは電流計の値を見て調整できるようにしたい
+            motor.go_back(30)
 
     # gpsによる初期位置修正----------------------------------------------
 
 
     # senser,pidを用いた初期向き設定---------------------------------
 
+    # gpsによる初期位置修正で傾いた角度を修正
+    # config.iniのpidフラグを1にしたら
     if(pid_flag):
         while(True):
-            pid_yaw.go_yaw()
+            MV = pid_yaw.go_yaw(0,sen_data["yaw"])
+
+            if(sen_data["yaw"] < 5):
+                break
+
+            motor.spinturn(MV)
 
     # senser,pidを用いた初期向き設定---------------------------------
 
