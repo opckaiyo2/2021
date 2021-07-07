@@ -1,3 +1,4 @@
+#coding: utf-8
 from concurrent import futures
 import sys
 import time

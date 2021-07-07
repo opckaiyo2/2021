@@ -1,3 +1,4 @@
+#coding: utf-8
 import datetime
 
 def log_txt(ard_data, gps_data):
