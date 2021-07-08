@@ -5,7 +5,7 @@ import tty
 import termios
 import json
 
-sys.path.append("/home/pi/workspace/python/PID")
+sys.path.append("/home/pi/2021/pool/teaching_mod")
 
 from multiprocessing import Process, Manager, Value
 from get_data import get_axisData, get_ardData, sort_data
@@ -37,13 +37,17 @@ with Manager() as manager:
   depth2goal = Value('i', 0)
   depth_now = Value('i', 0)
   correct_depth = Value('i', 0)
+  self = Value('i',0)
+  self2 = Value('i',0)
 
   #remote = Process(target=remote_process, daemon=True, args=("6000",))
   #camera = Process(target=camera_process, daemon=True, args=("5000",))
   get_axisLog = Process(target=get_axisData,daemon=True, args=(axis_data, axis_flg,))
   get_ardLog = Process(target=get_ardData,daemon=True, args=(ard_data, ard_flg,))
-  fix_yaw = Process(target=fix_yaw, daemon=True, args=(yaw2goal, yaw_now, max_correct_yaw, correct_yaw))
-  fix_depth = Process(target=fix_depth, daemon=True, args=(depth2goal, depth_now, correct_depth))
+  #fix_yaw = Process(target=fix_yaw, daemon=True, args=(yaw2goal, yaw_now, max_correct_yaw, correct_yaw))
+  #fix_depth = Process(target=fix_depth, daemon=True, args=(depth2goal, depth_now, correct_depth))
+  fix_yaw = Process(target=fix_yaw, daemon=True, args=(self, yaw2goal, yaw_now, max_correct_yaw, correct_yaw))
+  fix_depth = Process(target=fix_depth, daemon=True, args=(self2, depth2goal, depth_now, correct_depth))
 
   #remote.start()
   #camera.start()
@@ -112,6 +116,12 @@ with Manager() as manager:
         print("record rot[0]")
         #ロータリエンコーダの値をthreshold_rot[0]に記録
         threshold_rot[0] = log_data['avg_rot']
+        front_right_rot[0] = ard_data['front_right']['rot']
+        front_left_rot[0] = ard_data['front_left']['rot']
+        back_right_rot[0] = ard_data['back_right']['rot']
+        back_left_rot[0] = ard_data['back_left']['rot']
+        center_right_rot[0] = ard_data['center_left']['thr']
+        center_left_rot[0] = ard_data['center_right']['thr']
         status += 1
 
       elif status == 3:
@@ -124,6 +134,12 @@ with Manager() as manager:
         print("record rot[1]")
         #ロータリエンコーダの値をthreshold_rot[1]に記録
         threshold_rot[1] = log_data['avg_rot']
+        front_right_rot[1] = ard_data['front_right']['rot']
+        front_left_rot[1] = ard_data['front_left']['rot']
+        back_right_rot[1] = ard_data['back_right']['rot']
+        back_left_rot[1] = ard_data['back_left']['rot']
+        center_right_rot[1] = ard_data['center_left']['thr']
+        center_left_rot[1] = ard_data['center_right']['thr']
         status += 1
 
       elif status == 5:
@@ -142,9 +158,15 @@ with Manager() as manager:
       elif status == 7:
         #ロータリエンコーダの値をthreshold_rot[2]に記録
         threshold_rot[2] = log_data['avg_rot']
+        front_right_rot[2] = ard_data['front_right']['rot']
+        front_left_rot[2] = ard_data['front_left']['rot']
+        back_right_rot[2] = ard_data['back_right']['rot']
+        back_left_rot[2] = ard_data['back_left']['rot']
+        center_right_rot[2] = ard_data['center_left']['thr']
+        center_left_rot[2] = ard_data['center_right']['thr']
         print("set max_correct")
         max_correct_yaw.value = 20
-        #depth2goal.value = start_depth
+        depth2goal.value = start_depth
         depth2goal.value = 8000
         status += 1
 
@@ -160,6 +182,12 @@ with Manager() as manager:
         print("record rot[3]")
         #ロータリエンコーダの値をthreshold_rot[3]に記録
         threshold_rot[3] = log_data['avg_rot']
+        front_right_rot[3] = ard_data['front_right']['rot']
+        front_left_rot[3] = ard_data['front_left']['rot']
+        back_right_rot[3] = ard_data['back_right']['rot']
+        back_left_rot[3] = ard_data['back_left']['rot']
+        center_right_rot[3] = ard_data['center_left']['thr']
+        center_left_rot[3] = ard_data['center_right']['thr']
         status += 1
       
       elif status == 11:
@@ -169,6 +197,12 @@ with Manager() as manager:
       elif status == 12:
         #ロータリエンコーダの値をthreshold_rot[4]に記録
         threshold_rot[4] = log_data['avg_rot']
+        front_right_rot[4] = ard_data['front_right']['rot']
+        front_left_rot[4] = ard_data['front_left']['rot']
+        back_right_rot[4] = ard_data['back_right']['rot']
+        back_left_rot[4] = ard_data['back_left']['rot']
+        center_right_rot[4] = ard_data['center_left']['thr']
+        center_left_rot[4] = ard_data['center_right']['thr'] 
         status += 1
         
       elif status == 13:
@@ -178,12 +212,28 @@ with Manager() as manager:
         motor.stop()
         #ロータリエンコーダの値をthreshold_rot[5]に記録
         threshold_rot[5] = log_data['avg_rot']
+        front_right_rot[5] = ard_data['front_right']['rot']
+        front_left_rot[5] = ard_data['front_left']['rot']
+        back_right_rot[5] = ard_data['back_right']['rot']
+        back_left_rot[5] = ard_data['back_left']['rot']
+        center_right_rot[5] = ard_data['center_left']['thr']
+        center_left_rot[5] = ard_data['center_right']['thr']
 
         #filenameにthreshold_rotを上書き
         print("write rot to file")
         with open('/home/pi/2021/pool/Teaching_data/teaching.txt', mode = 'w') as f:
           json.dump(threshold_rot, f)
-        
+        with open('/home/pi/2021/pool/Teaching_data/front_right.txt', mode = 'w') as f:
+          json.dump(front_right_rot, f)
+        with open('/home/pi/2021/pool/Teaching_data/front_left.txt', mode = 'w') as f:
+          json.dump(front_left_rot, f)
+        with open('/home/pi/2021/pool/Teaching_data/back_right.txt', mode = 'w') as f:
+          json.dump(back_right_rot, f)
+        with open('/home/pi/2021/pool/Teaching_data/center_right.txt', mode = 'w') as f:
+          json.dump(center_right_rot, f)
+        with open('/home/pi/2021/pool/Teaching_data/center_left.txt', mode = 'w') as f:
+          json.dump(center_left_rot, f)
+
         status = -1
 
       if isPid_forward == 1:

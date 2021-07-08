@@ -122,7 +122,7 @@ class PID_depth:
 
 
 
-
+"""
 if __name__ == '__main__':
   motor = Motor()
 
@@ -164,3 +164,4 @@ if __name__ == '__main__':
       motor.stop()
       print(e)
       break
+"""
