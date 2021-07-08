@@ -15,7 +15,7 @@ def cap_main(hoop_Coordinate):
             gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
             kernel = np.ones((5,5),np.float32)/25
             dst = cv2.filter2D(gray,-1,kernel)
-            circles = cv2.HoughCircles(dst,cv2.HOUGH_GRADIENT,1,20,param1=75,param2=60,minRadius=0,maxRadius=0)
+            circles = cv2.HoughCircles(dst,cv2.HOUGH_GRADIENT,0.8,20,param1=75,param2=60,minRadius=0,maxRadius=0)
             hoop_Coordinate = circles
 
             #"""

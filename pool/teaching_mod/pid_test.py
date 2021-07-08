@@ -18,7 +18,6 @@ class PID_yaw:
   def fix_yaw(self,yaw2goal, yaw_now, max_correct, correct_yaw):
     motor = Motor()
 
-    #"""
     Kp = 0.5
     Ki = 0.01
     Kd = 0.001
@@ -29,21 +28,21 @@ class PID_yaw:
     #"""
 
 
-    max_correctVal = max_correct
-    if abs(yaw2goal - yaw_now) > 180:
-      self.e = 360 - abs(yaw2goal - yaw_now)
+    max_correct.valueVal = max_correct.value
+    if abs(yaw2goal.value.value - yaw_now.value) > 180:
+      self.e = 360 - abs(yaw2goal.value.value - yaw_now.value)
     else:
-      self.e = abs(yaw2goal - yaw_now)
+      self.e = abs(yaw2goal.value.value - yaw_now.value)
 
     self.M = self.M1 + Kp * (self.e-self.e1) + Ki * self.e + Kd * ((self.e-self.e1) - (self.e1-self.e2))
-    direction = self.turn_dir(yaw_now, yaw2goal)
+    direction = self.turn_dir(yaw_now.value, yaw2goal.value.value)
 
-    if self.M > max_correctVal:
-      self.M = max_correctVal
+    if self.M > max_correct.valueVal:
+      self.M = max_correct.valueVal
     elif self.M < 0:
       self.M = 0
 
-    correct_yaw = (self.M * direction)
+    correct_yaw.value = (self.M * direction)
 
     self.e2 = self.e1
     self.e1 = self.e
@@ -51,28 +50,28 @@ class PID_yaw:
     #time.sleep(1.0)
 
     #"""
-    print("目標 : " + str(yaw2goal))
-    print("現在 : " + str(yaw_now))
+    print("目標 : " + str(yaw2goal.value.value))
+    print("現在 : " + str(yaw_now.value))
     print("操作量 : " + str(self.M))
-    print("方向+操作量 : " + str(correct_yaw))
+    print("方向+操作量 : " + str(correct_yaw.value))
     print("")
     #"""
 
     #print("M : ",self.M)
-    motor.turn(correct_yaw)
+    motor.turn(correct_yaw.value)
 
 
-  def turn_dir(self,yaw_now, goal2yaw):
+  def turn_dir(self,yaw_now.value, goal2yaw):
     direction = 0
 
-    if yaw_now <= 180:
-      if -180 < yaw_now - goal2yaw < 0:
+    if yaw_now.value <= 180:
+      if -180 < yaw_now.value - goal2yaw < 0:
         direction = -1
       else:
         direction = 1
 
-    elif yaw_now <= 360:
-      if 0 < yaw_now - goal2yaw < 180:
+    elif yaw_now.value <= 360:
+      if 0 < yaw_now.value - goal2yaw < 180:
         direction = 1
       else:
         direction = -1
@@ -103,13 +102,13 @@ class PID_depth:
     Kd = 0.5
 
     while True:
-      max_correctVal = 10
+      max_correct.valueVal = 10
       self.e = abs(depth2goal.value - depth_now.value)
 
       self.M = self.M1 + Kp * (self.e-self.e1) + Ki * self.e + Kd * ((self.e-self.e1) - (self.e1-self.e2))
 
-      if self.M > max_correctVal:
-        self.M = max_correctVal
+      if self.M > max_correct.valueVal:
+        self.M = max_correct.valueVal
       elif self.M < 0:
         self.M = 0
 
@@ -127,9 +126,9 @@ if __name__ == '__main__':
   motor = Motor()
 
   yam2goal = 0
-  yaw_now = 0
-  max_correct = 30
-  correct_yaw = 0
+  yaw_now.value = 0
+  max_correct.value = 30
+  correct_yaw.value = 0
 
   pid = PID_yaw()
 
@@ -141,7 +140,7 @@ if __name__ == '__main__':
         String_data = ser.readline().decode('utf-8').rstrip()
         dic_date = ast.literal_eval(String_data)
         #print(dic_date)
-        yaw_now = int(dic_date["yaw"])
+        yaw_now.value = int(dic_date["yaw"])
         break
 
       except KeyboardInterrupt:
@@ -154,7 +153,7 @@ if __name__ == '__main__':
 
     try:
 
-      pid.fix_yaw(yam2goal,yaw_now,max_correct,correct_yaw)
+      pid.fix_yaw(yam2goal,yaw_now.value,max_correct.value,correct_yaw.value)
     
     except KeyboardInterrupt:
       motor.stop()
@@ -164,4 +163,5 @@ if __name__ == '__main__':
       motor.stop()
       print(e)
       break
+
 """
