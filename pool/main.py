@@ -9,11 +9,14 @@ sys.path.append("/home/pi/2021/pool/teaching_mod")
 
 from multiprocessing import Process, Manager, Value
 from get_data import get_axisData, get_ardData, sort_data
-from remote_process import remote_process
-from camera_process import camera_process
+#from remote_process import remote_process
+#from camera_process import camera_process
 from motor_controller import Motor
-from pid import fix_yaw, fix_depth
+from pid_test import PID_yaw, PID_depth
 import datetime
+
+pid_yaw = PID_yaw()
+pid_depth = PID_depth()
 
 def calc_turnVal(yaw_now):
   val = yaw_now - 180
@@ -40,8 +43,8 @@ with Manager() as manager:
 
   get_axisLog = Process(target=get_axisData,daemon=True, args=(axis_data, axis_flg,))
   get_ardLog = Process(target=get_ardData,daemon=True, args=(ard_data, ard_flg,))
-  fix_yaw = Process(target=fix_yaw, daemon=True, args=(yaw2goal, yaw_now, max_correct_yaw, correct_yaw))
-  fix_depth = Process(target=fix_depth, daemon=True, args=(depth2goal, depth_now, correct_depth))
+  fix_yaw = Process(target=pid_yaw.fix_yaw, daemon=True, args=(yaw2goal, yaw_now, max_correct_yaw, correct_yaw))
+  fix_depth = Process(target=pid_depth.fix_depth, daemon=True, args=(depth2goal, depth_now, correct_depth))
 
   get_ardLog.start()
   fix_yaw.start()

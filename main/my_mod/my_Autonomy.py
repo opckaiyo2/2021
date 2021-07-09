@@ -1,5 +1,4 @@
 #coding: utf-8
-from re import T
 import sys
 import ast
 import configparser
@@ -12,60 +11,15 @@ from my_motor import Motor
 from my_waypoint import waypoint
 # pid制御
 from my_balance import PID_yaw,PID_depth
+# オペレートファンクション-制御関数
+from my_operatfunction import OF
 
 def Autonomy(sen_data):
 
-    # 設定ファイル読み込み-------------------------------------------
-    INI_FILE = "/home/pi/2021/main/config/config.ini"
-    inifile = configparser.SafeConfigParser()
-    inifile.read(INI_FILE)
-
-    gps_initial = inifile.get("operation", "gps_initial")
-    gps_diving = inifile.get("operation", "gps_diving")
-    gps_ascend = inifile.get("operation", "gps_ascend")
-    speed = inifile.get("operation", "defalut_speed")
-    depth = inifile.get("operation", "depth")
-
-    ava_rot = inifile.getint("autonomy","ava_rot")
-    re_rot = inifile.getint("autonomy","re_rot")
-
-    gps_initial = ast.literal_eval(gps_initial)
-    gps_diving = ast.literal_eval(gps_diving)
-    gps_ascend = ast.literal_eval(gps_ascend)
-    # 設定ファイル読み込み-------------------------------------------
-
-    # 初期の深さを記録
-    begin_depth = sen_data["depth"]
-
-    pid_yaw = PID_yaw()
-    pid_depth = PID_depth()
-    motor = Motor()
-
+    of = OF()
 
     # gpsによる初期位置修正----------------------------------------------
-    while(True):
-        # gpsとconfig.iniの初期位置比較
-        gps = waypoint(sen_data["lat"], sen_data["lon"],
-                    gps_initial["lat"], gps_initial["lon"])
-        
-        # 初期位置との誤差が2mいないだったら位置調整終了(gps_datasheetより誤差2m)
-        if(gps["distance_2d"] < 2):
-            motor.stop_go_back()
-            break
-        
-        # まずは角度調整,角度調節せず直進すると明後日の方向に
-        while(True):
-            if((gps["azimuth"]-sen_data["yaw"]) < 5):
-                motor.stop()
-                break
-
-            # 方位角とオイラー角を合わせないといけない
-            MV = pid_yaw.go_yaw(gps["azimuth"],sen_data["yaw"])
-            motor.spinturn(MV)
-
-        # 直進 進む強さは電流計の値を見て調整できるようにしたい
-        MV = pid_yaw.go_yaw(0,sen_data["yaw"])
-        motor.go_back_each(speed-MV,speed+MV,speed,speed)
+    of.gps_Initial_position(sen_data)
     # gpsによる初期位置修正----------------------------------------------
 
 
