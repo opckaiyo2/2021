@@ -1,4 +1,5 @@
 #coding: utf-8
+from re import T
 import sys
 import ast
 import configparser
@@ -25,13 +26,16 @@ def Autonomy(sen_data):
     speed = inifile.get("operation", "defalut_speed")
     depth = inifile.get("operation", "depth")
 
-    ava_rot = inifile.get("autonomy","ava_rot")
+    ava_rot = inifile.getint("autonomy","ava_rot")
+    re_rot = inifile.getint("autonomy","re_rot")
 
     gps_initial = ast.literal_eval(gps_initial)
     gps_diving = ast.literal_eval(gps_diving)
     gps_ascend = ast.literal_eval(gps_ascend)
     # 設定ファイル読み込み-------------------------------------------
 
+    # 初期の深さを記録
+    begin_depth = sen_data["depth"]
 
     pid_yaw = PID_yaw()
     pid_depth = PID_depth()
@@ -109,24 +113,86 @@ def Autonomy(sen_data):
         MV = pid_depth.go_depth(depth,sen_data("depth"))
 
         # datasheetの分解能から記入したい(0.2)
-        if(abs(depth-sen_data) < 0.2):
+        if(abs(depth-sen_data["depth"]) < 0.2):
             break
     # 潜水--------------------------------------------------------------
 
 
     # motor回転数によって潜航(浮上しgpsで目的地じゃなければ潜水しなおし)----
+    for i in range(4):
+        rot[i] = int(sen_data["rot"+str(i)])
+    
+    rot_sum = sum(rot)
+
+    # 潜水しながら深さpid
     while(True):
         for i in range(4):
             rot[i] = int(sen_data["rot"+str(i)])
         
-        ava = sum(rot) / len(rot)
+        ava = (sum(rot)-rot_sum) / len(rot)
 
         if(ava > ava_rot):
             motor.stop_go_back()
             break
 
+        motor.go_back(speed)
+
         MV = pid_depth.go_depth(depth,sen_data["depth"])
         motor.up_down(MV)
+
+    # 浮上
+    while(True):
+        MV = pid_depth.go_depth(begin_depth,sen_data["depth"])
+
+        # datasheetの分解能から記入したい(0.2)
+        if(abs(begin_depth-sen_data) < 0.2):
+            motor.stop_up_down()
+            break
+
+        motor.up_down(MV)
+
+    # gpsで位置比較 目的地でないとき再び潜水
+    while(True):
+        gps = waypoint(sen_data["lat"],sen_data["lon"],gps_ascend["lat"],gps_ascend["lon"])
+        if(gps["distance_2d"] < 2):
+            break
+
+        while(True):
+            MV = pid_depth.go_depth(depth,sen_data("depth"))
+
+            # datasheetの分解能から記入したい(0.2)
+            if(abs(depth-sen_data["depth"]) < 0.2):
+                break
+
+        for i in range(4):
+            rot[i] = int(sen_data["rot"+str(i)])
+
+        rot_sum = sum(rot)
+
+        while(True):
+            for i in range(4):
+                rot[i] = int(sen_data["rot"+str(i)])
+
+            ava = (sum(rot)-rot_sum) / len(rot)
+
+            if(ava > re_rot):
+                motor.stop_go_back()
+                break
+
+            motor.go_back(speed)
+
+            MV = pid_depth.go_depth(depth,sen_data["depth"])
+            motor.up_down(MV)
+
+        while(True):
+            MV = pid_depth.go_depth(begin_depth,sen_data["depth"])
+
+            # datasheetの分解能から記入したい(0.2)
+            if(abs(begin_depth-sen_data) < 0.2):
+                motor.stop_up_down()
+                break
+
+            motor.up_down(MV)
     # motor回転数によって潜航(浮上しgpsで目的地じゃなければ潜水しなおし)----
 
 
