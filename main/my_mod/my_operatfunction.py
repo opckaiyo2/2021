@@ -1,4 +1,5 @@
 #coding: utf-8
+from re import T
 import sys
 import ast
 import configparser
@@ -28,38 +29,48 @@ class OF:
         self.ava_rot = inifile.getint("autonomy","ava_rot")
         self.re_rot = inifile.getint("autonomy","re_rot")
 
-        self.gps_initial = ast.literal_eval(gps_initial)
-        self.gps_diving = ast.literal_eval(gps_diving)
-        self.gps_ascend = ast.literal_eval(gps_ascend)
+        self.gps_maker["initial"] = ast.literal_eval(self.gps_initial)
+        self.gps_maker["diving"] = ast.literal_eval(self.gps_diving)
+        self.gps_maker["ascend"] = ast.literal_eval(self.gps_ascend)
         # 設定ファイル読み込み-------------------------------------------
 
         self.pid_yaw = PID_yaw()
         self.pid_depth = PID_depth()
         self.motor = Motor()
 
-    def gps_Initial_position(self,**sen_data):
-            while(True):
-                # gpsとconfig.iniの初期位置比較
-                gps = waypoint(sen_data["lon"],sen_data["lat"],
-                            self.gps_initial["lon"], self.gps_initial["lat"])
-                
-                # 初期位置との誤差が2mいないだったら位置調整終了(gps_datasheetより誤差2m)
-                if(gps["distance_2d"] < 2):
-                    self.motor.stop_go_back()
-                    break
-                
-                # まずは角度調整,角度調節せず直進すると明後日の方向に
-                while(True):
-                    if((gps["azimuth"]-sen_data["yaw"]) < 5):
-                        self.motor.stop()
-                        break
+    def gps_position(self,maker,**sen_data):
+        while(True):
+            # gpsとconfig.iniの初期位置比較
+            gps = waypoint(sen_data["lon"],sen_data["lat"],
+                        self.gps_maker[maker]["lon"], self.gps_maker[maker]["lat"])
+            
+            # 初期位置との誤差が2mいないだったら位置調整終了(gps_datasheetより誤差2m)
+            if(gps["distance_2d"] < 2):
+                self.motor.stop_go_back()
+                break
+            
+            # まずは角度調整,角度調節せず直進すると明後日の方向に
+            self.rotate_yaw(gps["azimuth"],sen_data)
 
-                    # 方位角とオイラー角を合わせないといけない
-                    MV = self.pid_yaw.go_yaw(gps["azimuth"],sen_data["yaw"])
-                    self.motor.spinturn(MV)
+            # 直進 進む強さは電流計の値を見て調整できるようにしたい
+            MV = self.pid_yaw.go_yaw(0,sen_data["yaw"])
+            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed,self.speed)
 
-                # 直進 進む強さは電流計の値を見て調整できるようにしたい
-                MV = self.pid_yaw.go_yaw(0,sen_data["yaw"])
-                self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed,self.speed)
+    def rotate_yaw(self,goal,**sen_data):
+        while(True):
+            if((goal-sen_data["yaw"]) < 5):
+                self.motor.stop()
+                break
 
-    def rotate_yaw(self,):
+            # 方位角とオイラー角を合わせないといけない
+            MV = self.pid_yaw.go_yaw(goal,sen_data["yaw"])
+            self.motor.spinturn(MV)
+
+    def diving(self,**sen_data):
+        while(True):
+            # datasheetの分解能から記入したい(0.2)
+            if(abs(self.depth-sen_data["depth"]) < 0.2):
+                break
+
+            MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
+            self.motor.up_down(MV)

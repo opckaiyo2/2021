@@ -19,56 +19,23 @@ def Autonomy(sen_data):
     of = OF()
 
     # gpsによる初期位置修正----------------------------------------------
-    of.gps_Initial_position(sen_data)
+    of.gps_position("initial",sen_data)
     # gpsによる初期位置修正----------------------------------------------
 
 
     # senser,pidを用いた初期向き設定---------------------------------
     # gpsによる初期位置修正で傾いた角度を修正
-    while(True):
-        MV = pid_yaw.go_yaw(0,sen_data["yaw"])
-
-        if(sen_data["yaw"] < 5):
-            motor.stop()
-            break
-
-        motor.spinturn(MV)
+    of.rotate_yaw(0,sen_data)
     # senser,pidを用いた初期向き設定---------------------------------
 
 
     # gpsによる潜水地点まで----------------------------------------------
-    while(True):
-        # gpsとconfig.iniの潜水位置比較
-        gps = waypoint(sen_data["lat"], sen_data["lon"],
-                    gps_diving["lat"], gps_diving["lon"])
-        
-        # 潜水位置との誤差が2mいないだったら位置調整終了(gps_datasheetより誤差2m)
-        if(gps["distance_2d"] < 2):
-            motor.stop_go_back()
-            break
-        
-        # まずは角度調整,角度調節せず直進すると明後日の方向に
-        while(True):
-            if((gps["azimuth"]-sen_data["yaw"]) < 5):
-                motor.stop()
-                break
-
-            MV = pid_yaw.go_yaw(gps["azimuth"],sen_data["yaw"])
-            motor.spinturn(MV)
-
-        # 直進 進む強さは電流計の値を見て調整できるようにしたい
-        MV = pid_yaw.go_yaw(0,sen_data["yaw"])
-        motor.go_back_each(speed-MV,speed+MV,speed,speed)
+    of.gps_position("diving",sen_data)
     # gpsによる潜水地点まで----------------------------------------------
 
 
     # 潜水--------------------------------------------------------------
-    while(True):
-        MV = pid_depth.go_depth(depth,sen_data("depth"))
-
-        # datasheetの分解能から記入したい(0.2)
-        if(abs(depth-sen_data["depth"]) < 0.2):
-            break
+    of.diving(sen_data)
     # 潜水--------------------------------------------------------------
 
 
