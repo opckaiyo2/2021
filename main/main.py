@@ -1,12 +1,7 @@
 #coding: utf-8
 from concurrent import futures
 import sys
-import time
 import sys
-import serial
-import ast
-import termios
-import os
 import configparser
 from multiprocessing import Process, Manager, Value
 
@@ -34,7 +29,7 @@ from my_Manual import Manual
 
 INI_FILE = "/home/pi/2021/main/config/config.ini"
 inifile = configparser.SafeConfigParser()
-inifile.read(INI_FILE)
+inifile.read(INI_FILE,encoding="utf-8")
 
 operation = inifile.getint("main", "operation")
 
@@ -72,7 +67,7 @@ def main():
         camera_process.start()
         log_process.start()
 
-        # 必要な機能のオブジェクト作成
+        # 必要な機能のインスタンス作成
         # main.pyの中でモータは制御しないつもりだが緊急停止用
         motor = Motor()
 

@@ -12,7 +12,7 @@ def Teaching():
 
     INI_FILE = "/home/pi/2021/main/config/config.ini"
     inifile = configparser.SafeConfigParser()
-    inifile.read(INI_FILE)
+    inifile.read(INI_FILE,encoding="utf-8")
 
     # どのデータを読み込むか
 

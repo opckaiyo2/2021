@@ -1,8 +1,5 @@
 #coding: utf-8
 import configparser
-import numpy as np
-import time
-import sys
 
 #PID制御で角度調整---------------------------------------------------------------
 
@@ -21,7 +18,7 @@ class PID_yaw:
         # 設定ファイル読み込み-------------------------------------------
         INI_FILE = "/home/pi/2021/main/config/config.ini"
         inifile = configparser.SafeConfigParser()
-        inifile.read(INI_FILE)
+        inifile.read(INI_FILE,encoding="utf-8")
 
         yaw_pid = inifile['yaw_pid']
         # 設定ファイル読み込み-------------------------------------------
@@ -103,7 +100,7 @@ class PID_depth:
         # 設定ファイル読み込み-------------------------------------------
         INI_FILE = "/home/pi/2021/main/config/config.ini"
         inifile = configparser.SafeConfigParser()
-        inifile.read(INI_FILE)
+        inifile.read(INI_FILE,encoding="utf-8")
 
         depth_pid = inifile['depth_pid']
         # 設定ファイル読み込み-------------------------------------------

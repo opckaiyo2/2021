@@ -12,7 +12,7 @@ def Manual():
 
     INI_FILE = "/home/pi/2021/main/config/config.ini"
     inifile = configparser.SafeConfigParser()
-    inifile.read(INI_FILE)
+    inifile.read(INI_FILE,encoding="utf-8")
 
     # key入力かプロボか
     # モータ回転数をteaching用データとして出力するか
