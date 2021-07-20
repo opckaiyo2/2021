@@ -22,7 +22,6 @@ class OF:
         gps_initial = inifile.get("operation", "gps_initial")
         gps_diving = inifile.get("operation", "gps_diving")
         gps_ascend = inifile.get("operation", "gps_ascend")
-        gps_test = inifile.get("operation", "gps_test")
         self.speed = inifile.getfloat("operation", "defalut_speed")
         self.depth = inifile.getint("operation", "depth")
 
@@ -31,8 +30,7 @@ class OF:
 
         self.gps_maker = {"initial":ast.literal_eval(gps_initial),
                     "diving":ast.literal_eval(gps_diving),
-                    "ascend":ast.literal_eval(gps_ascend),
-                    "test":ast.literal_eval(gps_test)}
+                    "ascend":ast.literal_eval(gps_ascend)}
         # 設定ファイル読み込み-------------------------------------------
 
         self.pid_yaw = PID_yaw()
