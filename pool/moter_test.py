@@ -16,45 +16,45 @@ if __name__ == "__main__":
     try:
         while(True):
             #""" ここの#を入れたり消したりでコメントアウトを切り替えられる
-            print("motor_power 10")
+            print("motor_power 30")
             
-            motor.forward_each(10,0,0,0)
+            motor.forward_each(30,0,0,0)
             time.sleep(2.0)
             motor.stop()
 
-            motor.forward_each(-10,0,0,0)
+            motor.forward_each(-30,0,0,0)
             time.sleep(2.0)
             motor.stop()
 
-            motor.forward_each(0,10,0,0)
+            motor.forward_each(0,30,0,0)
             time.sleep(2.0)
             motor.stop()
 
-            motor.forward_each(0,-10,0,0)
+            motor.forward_each(0,-30,0,0)
             time.sleep(2.0)
             motor.stop()
             
-            motor.forward_each(0,0,10,0)
+            motor.forward_each(0,0,30,0)
             time.sleep(2.0)
             motor.stop()
 
-            motor.forward_each(0,0,-10,0)
+            motor.forward_each(0,0,-30,0)
             time.sleep(2.0)
             motor.stop()
 
-            motor.forward_each(0,0,0,10)
+            motor.forward_each(0,0,0,30)
             time.sleep(2.0)
             motor.stop()
 
-            motor.forward_each(0,0,0,-10)
+            motor.forward_each(0,0,0,-30)
             time.sleep(2.0)
             motor.stop()
 
-            motor.up(10)
+            motor.up(30)
             time.sleep(2.0)
             motor.stop()
 
-            motor.down(10)
+            motor.down(30)
             time.sleep(2.0)
             motor.stop()
             #"""
