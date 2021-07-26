@@ -1,7 +1,6 @@
 #coding: utf-8
 from concurrent import futures
 import sys
-import sys
 import configparser
 from multiprocessing import Process, Manager, Value
 

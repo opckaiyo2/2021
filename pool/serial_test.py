@@ -15,12 +15,15 @@ if __name__ == "__main__":
     ser = serial.Serial('/dev/ttyACM0', 9600)
 
     motor = Motor()
+
+    power = 10
+    print("motor power : ",power)
     
     while True:
         
         try:
-            motor.forward_each(10,10,10,10)
-            motor.up(10)
+            motor.forward_each(power,power,power,power)
+            motor.up(power)
 
             #arduinoから一行読み取り
             String_data = ser.readline().decode('utf-8').rstrip()

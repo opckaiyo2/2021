@@ -2,6 +2,7 @@
 import sys
 import ast
 import configparser
+from multiprocessing import Process, Manager, Value
 
 # 自作関数の場所をsystempathに追加
 sys.path.append("/home/pi/2021/main/my_mod")
@@ -11,6 +12,11 @@ from my_waypoint import waypoint
 from my_motor import Motor
 # pid制御
 from my_balance import PID_yaw,PID_depth
+# arduinoとシリアル通信　済
+from my_ard import get_sen
+# gpsのデータ取得
+from my_gps import get_gps
+
 
 class OF:
     def __init__(self):
@@ -161,3 +167,25 @@ class OF:
             self.ascend(sen_data)
 
             # wait gps取れるまで
+
+
+if __name__ == "__main__":
+    of = OF()
+    motor = Motor()
+    with Manager() as manager:
+        try:
+            sen_sata = manager.dict()
+            
+            ard_process = Process(target=get_sen, daemon=True, args=(sen_sata,))
+            gps_process = Process(target=get_gps, daemon=True, args=(sen_sata,))
+
+            ard_process.start()
+            gps_process.start()
+
+            of.gps_position("test",sen_sata)
+
+        except KeyboardInterrupt:
+            motor.stop()
+
+        except Exception as e:
+            motor.stop()
