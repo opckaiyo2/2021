@@ -50,8 +50,8 @@ class OF:
     def gps_position(self,maker,**sen_data):
         while(True):
             # gpsとconfig.iniの初期位置比較
-            gps = self.waypoint(sen_data["lon"],sen_data["lat"],
-                        self.gps_maker[maker]["lon"], self.gps_maker[maker]["lat"])
+            gps = self.waypoint(sen_data["lat"],sen_data["lon"],
+                        self.gps_maker[maker]["lat"], self.gps_maker[maker]["lon"])
             
             # 初期位置との誤差が2mいないだったら位置調整終了(gps_datasheetより誤差2m)
             if(gps["distance_2d"] < 2):
@@ -151,8 +151,8 @@ class OF:
     def re_diving(self,maker,yaw,**sen_data):
         while(True):
             # wapoint関数で距離、方位角、逆方位角もとめる(距離と角度)
-            gps = self.waypoint(sen_data["lot"],sen_data["lat"],
-                self.gps_maker[maker]["lon"],self.gps_maker[maker]["lat"])
+            gps = self.waypoint(sen_data["lat"],sen_data["lon"],
+                self.gps_maker[maker]["lat"],self.gps_maker[maker]["lon"])
             
             # 目標との距離が2mいないなら(gpsの誤差が2mのため)
             if(gps["distance_2d"] < 2):
@@ -169,9 +169,9 @@ class OF:
 
     # gpsと現在地の緯度、経度から距離、方位角、逆方位角を求める
     # 引数 g_lat:目的地緯度 g_lon:目的地経度 **sen_data:センサの値(辞書型)
-    def waypoint(self,g_lat,g_lon,**sen_data):
+    def waypoint(self,s_lat,s_lon,g_lat,g_lon):
         g = Geod(ellps='WGS84')
-        azimuth, back_azimuth, distance_2d = g.inv(sen_data["lon"],sen_data["lat"], g_lat, g_lon)
+        azimuth, back_azimuth, distance_2d = g.inv(s_lat,s_lon, g_lat, g_lon)
         gps = {'azimuth': azimuth, 'back_azimuth': back_azimuth,'distance_2d': distance_2d}
         return gps
 
@@ -188,7 +188,18 @@ if __name__ == "__main__":
             ard_process.start()
             gps_process.start()
 
-            of.gps_position("test",sen_sata)
+            # デバック順番---------------
+            # azimuth 210.490025 back 30.4546277777778 distance 15,719.204m になるはず
+            # print(of.waypoint(sen_sata["lat"],sen_sata["lon"],26.258317,127.736353))
+            
+            # 設定した方向に回転するはず
+            # of.rotate_yaw(180,sen_sata)
+            
+            # 行きたい方向に自動で行くはず
+            # of.gps_position("test",sen_sata)
+            
+            # あとは適当で可
+            # デバック順番---------------
 
         except KeyboardInterrupt:
             motor.stop()
