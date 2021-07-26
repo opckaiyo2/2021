@@ -2,12 +2,11 @@
 import sys
 import ast
 import configparser
+from pyproj import Geod
 from multiprocessing import Process, Manager, Value
 
 # 自作関数の場所をsystempathに追加
 sys.path.append("/home/pi/2021/main/my_mod")
-# gpsのデータから目的地までの角度と距離の差異を計算する
-from my_waypoint import waypoint
 # motor制御
 from my_motor import Motor
 # pid制御
@@ -51,7 +50,7 @@ class OF:
     def gps_position(self,maker,**sen_data):
         while(True):
             # gpsとconfig.iniの初期位置比較
-            gps = waypoint(sen_data["lon"],sen_data["lat"],
+            gps = self.waypoint(sen_data["lon"],sen_data["lat"],
                         self.gps_maker[maker]["lon"], self.gps_maker[maker]["lat"])
             
             # 初期位置との誤差が2mいないだったら位置調整終了(gps_datasheetより誤差2m)
@@ -152,7 +151,7 @@ class OF:
     def re_diving(self,maker,yaw,**sen_data):
         while(True):
             # wapoint関数で距離、方位角、逆方位角もとめる(距離と角度)
-            gps = waypoint(sen_data["lot"],sen_data["lat"],
+            gps = self.waypoint(sen_data["lot"],sen_data["lat"],
                 self.gps_maker[maker]["lon"],self.gps_maker[maker]["lat"])
             
             # 目標との距離が2mいないなら(gpsの誤差が2mのため)
@@ -168,6 +167,13 @@ class OF:
 
             # wait gps取れるまで
 
+    # gpsと現在地の緯度、経度から距離、方位角、逆方位角を求める
+    # 引数 g_lat:目的地緯度 g_lon:目的地経度 **sen_data:センサの値(辞書型)
+    def waypoint(self,g_lat,g_lon,**sen_data):
+        g = Geod(ellps='WGS84')
+        azimuth, back_azimuth, distance_2d = g.inv(sen_data["lon"],sen_data["lat"], g_lat, g_lon)
+        gps = {'azimuth': azimuth, 'back_azimuth': back_azimuth,'distance_2d': distance_2d}
+        return gps
 
 if __name__ == "__main__":
     of = OF()
