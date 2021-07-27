@@ -1,4 +1,6 @@
 #coding: utf-8
+import select
+import tty
 import sys
 import configparser
 
@@ -21,6 +23,24 @@ def Manual():
 
 
     # key入力で制御する場合------------------------------------------
+    tty.setcbreak(sys.stdin.fileno())
+
+    motor = Motor()
+    power = 10
+
+    while(True):
+        if select.select([sys.stdin],[],[],0) == ([sys.stdin],[],[]):
+            input_key = sys.stdin.read(1)
+
+            if input_key == "w":
+                motor.go_back(power)
+            elif input_key == "s":
+                motor.go_back(power*-1)
+            elif input_key == " ":
+                motor.up_down(power)
+            elif input_key == "z":
+                motor.up_down(power*-1)
+
     # key入力で制御する場合------------------------------------------
 
 
