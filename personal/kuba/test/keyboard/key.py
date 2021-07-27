@@ -11,10 +11,10 @@ if __name__ == "__main__":
 
     while True:
         if isInputData():
-            input_key = sys.stdin.read(3)
+            input_key = sys.stdin.read(1)
             print(input_key)
 
             print("input key : ",input_key)
 
-            if input_key == "[A":
+            if input_key == "a":
                 print("koko")
