@@ -10,6 +10,14 @@ def Autonomy(sen_data):
 
     of = OF()
 
+    # 初期の向きを暗記
+    ini_x = sen_data["x"]
+
+    if ini_x < 180:
+        op_x = 180
+    elif ini_x > 180:
+        op_x = 180
+
     # gpsによる初期位置修正----------------------------------------------
     of.gps_position("initial",sen_data)
     # gpsによる初期位置修正----------------------------------------------
@@ -17,7 +25,7 @@ def Autonomy(sen_data):
 
     # senser,pidを用いた初期向き設定---------------------------------
     # gpsによる初期位置修正で傾いた角度を修正
-    of.rotate_yaw(0,sen_data)
+    of.rotate_yaw(ini_x,sen_data)
     # senser,pidを用いた初期向き設定---------------------------------
 
 
@@ -33,18 +41,18 @@ def Autonomy(sen_data):
 
 
     # motor回転数によって潜航(浮上しgpsで目的地じゃなければ潜水しなおし)----
-    of.diving_advance("ava_rot",0,sen_data)
+    of.diving_advance("ava_rot",ini_x,sen_data)
 
     # 浮上
     of.ascend(sen_data)
 
     # gpsで位置比較 目的地でないとき再び潜水
-    of.re_diving("ascend",0,sen_data)
+    of.re_diving("ascend",ini_x,sen_data)
     # motor回転数によって潜航(浮上しgpsで目的地じゃなければ潜水しなおし)----
 
 
     # Uターン-----------------------------------------------------------
-    of.rotate_yaw(180,sen_data)
+    of.rotate_yaw(op_x,sen_data)
     # Uターン-----------------------------------------------------------
 
 
@@ -54,13 +62,13 @@ def Autonomy(sen_data):
 
 
     # motor回転数によって潜航(浮上しgpsで目的地じゃなければ潜水しなおし)----
-    of.diving_advance("ava_rot",180,sen_data)
+    of.diving_advance("ava_rot",op_x,sen_data)
 
     # 浮上
     of.ascend(sen_data)
 
     #gpsで位置比較 目的地でなければ再び潜水
-    of.re_diving("diving",180,sen_data)
+    of.re_diving("diving",op_x,sen_data)
     # motor回転数によって潜航(浮上しgpsで目的地じゃなければ潜水しなおし)----
 
 
