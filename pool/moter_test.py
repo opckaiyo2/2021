@@ -17,6 +17,7 @@ if __name__ == "__main__":
 
     try:
         while(True):
+            motor.forward(30)
             #""" ここの#を入れたり消したりでコメントアウトを切り替えられる
             print("motor_power ",power)
             

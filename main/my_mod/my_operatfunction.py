@@ -24,10 +24,10 @@ class OF:
         inifile = configparser.SafeConfigParser()
         inifile.read(INI_FILE,encoding="utf-8")
 
-        gps_initial = inifile.get("operation", "gps_initial")
-        gps_diving = inifile.get("operation", "gps_diving")
-        gps_ascend = inifile.get("operation", "gps_ascend")
-        gps_test = inifile.get("operation", "gps_test")
+        gps_initial = ast.literal_eval(inifile.get("operation", "gps_initial"))
+        gps_diving = ast.literal_eval(inifile.get("operation", "gps_diving"))
+        gps_ascend = ast.literal_eval(inifile.get("operation", "gps_ascend"))
+        gps_test = ast.literal_eval(inifile.get("operation", "gps_test"))
         
         self.speed = inifile.getfloat("operation", "defalut_speed")
         self.depth = inifile.getint("operation", "depth")
@@ -35,10 +35,10 @@ class OF:
         self.rotate = {"ava_rot":inifile.getint("autonomy","ava_rot"),
                     "re_rot":inifile.getint("autonomy","re_rot")}
 
-        self.gps_maker = {"initial":ast.literal_eval(gps_initial),
-                    "diving":ast.literal_eval(gps_diving),
-                    "ascend":ast.literal_eval(gps_ascend),
-                    "test":ast.literal_eval(gps_test)}
+        self.gps_maker = {"initial":gps_initial,
+                    "diving":gps_diving,
+                    "ascend":gps_ascend,
+                    "test":gps_test}
         # 設定ファイル読み込み-------------------------------------------
 
         self.pid_yaw = PID_yaw()
@@ -187,6 +187,8 @@ if __name__ == "__main__":
 
             ard_process.start()
             gps_process.start()
+
+            motor.go_back(10)
 
             # デバック順番---------------
             # azimuth 210.490025 back 30.4546277777778 distance 15,719.204m になるはず

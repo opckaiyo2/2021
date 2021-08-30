@@ -22,8 +22,8 @@ if __name__ == "__main__":
     while True:
         
         try:
-            motor.forward_each(power,power,power,power)
-            motor.up(power)
+            #motor.forward_each(power,power,power,power)
+            #motor.up(power)
 
             #arduinoから一行読み取り
             String_data = ser.readline().decode('utf-8').rstrip()

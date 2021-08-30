@@ -170,7 +170,7 @@ if __name__ == '__main__':
             num = int(input("input = "))
             if num != 0:
                 parsent_val = int(input("output(%) = "))
-             
+            
             if num == 0 :
                 myMotor.stop()
             elif num == 1 :
