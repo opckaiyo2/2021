@@ -23,7 +23,8 @@ if __name__ == "__main__":
     while True:
         
         try:
-            #motor.forward_each(power,power,power,power)
+            rot = 0
+            motor.forward_each(power,power,power,power)
             #motor.up(power)
 
             #arduinoから一行読み取り
@@ -33,7 +34,12 @@ if __name__ == "__main__":
             #debagprint
             print(dic_date)
 
-            motor.forward_each(power,power,power,power)
+            for i in range(4):
+                rot += dic_date["rot"+str(i)]
+                pass
+
+            if(rot > 3000):
+                raise Exception("motor rotate")
 
             with open(filiname, 'a') as f:
                 f.writelines(str(dic_date))
@@ -44,8 +50,19 @@ if __name__ == "__main__":
             motor.stop()
             break
 
+        except UnicodeDecodeError as e:
+            print("\n")
+            print("error : ",e)
+            print("\n")
+
+        except SyntaxError as e:
+            print("\n")
+            print("error : ",e)
+            print("\n")
+
         except Exception as e:
             motor.stop()
             print("\n")
             print("error : ",e)
             print("\n")
+            break
