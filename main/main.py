@@ -1,6 +1,8 @@
 #coding: utf-8
 from concurrent import futures
 import sys
+import time
+import traceback
 import configparser
 from multiprocessing import Process, Manager, Value
 
@@ -27,7 +29,7 @@ from my_Manual import Manual
 # 設定ファイル読み込み-------------------------------------------
 
 INI_FILE = "/home/pi/2021/main/config/config.ini"
-inifile = configparser.SafeConfigParser()
+inifile = configparser.ConfigParser()
 inifile.read(INI_FILE,encoding="utf-8")
 
 operation = inifile.getint("main", "operation")
@@ -54,15 +56,15 @@ def main():
         # ardからデータ取得
         ard_process = Process(target=get_sen, daemon=True, args=(sen_data,))
         # gpsからデータ取得
-        gps_process = Process(target=get_gps, daemon=True, args=(sen_data,))
+        #gps_process = Process(target=get_gps, daemon=True, args=(sen_data,))
         # カメラ
-        camera_process = Process(traget=cap_main, daemon=True, args=(hoop_Coordinate,))
+        camera_process = Process(target=cap_main, daemon=True, args=(hoop_Coordinate,))
         # データログ
         log_process = Process(target=log_txt, daemon=True, args=(sen_data,))
 
         # 各プロセススタート
         ard_process.start()
-        gps_process.start()
+        #gps_process.start()
         camera_process.start()
         log_process.start()
 
@@ -74,7 +76,7 @@ def main():
             # どの操作方法で動かすか---------------------------------
             
             if(operation == 1):
-                Teaching()
+                Teaching(sen_data)
             elif(operation == 2):
                 Autonomy(sen_data)
             elif(operation == 3):
@@ -89,6 +91,7 @@ def main():
             motor.stop()
         except Exception as e:
             motor.stop()
+            print(traceback.format_exc())
             print("\n")
             print("main.py main try error : ",e)
             print("\n")

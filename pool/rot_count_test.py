@@ -24,7 +24,7 @@ if __name__ == "__main__":
         
         try:
             rot = 0
-            motor.forward_each(power,power,power,power)
+            #motor.forward_each(power,power,power,power)
             #motor.up(power)
 
             #arduinoから一行読み取り
@@ -32,7 +32,7 @@ if __name__ == "__main__":
             #文字列から辞書型に変換
             dic_date = ast.literal_eval(String_data)
             #debagprint
-            print(dic_date)
+            #print(dic_date)
 
             for i in range(4):
                 rot += dic_date["rot"+str(i)]
@@ -44,6 +44,8 @@ if __name__ == "__main__":
             with open(filiname, 'a') as f:
                 f.writelines(str(dic_date))
                 f.writelines("\n")
+
+            motor.forward_each(power,power,power,power)
 
 
         except KeyboardInterrupt as key:

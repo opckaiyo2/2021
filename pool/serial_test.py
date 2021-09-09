@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     motor = Motor()
 
-    power = 10
+    power = 30
     print("motor power : ",power)
     
     while True:
@@ -29,6 +29,7 @@ if __name__ == "__main__":
             #arduinoから一行読み取り
             String_data = ser.readline().decode('utf-8').rstrip()
             #文字列から辞書型に変換
+            print(String_data)
             dic_date = ast.literal_eval(String_data)
             #debagprint
             print(dic_date)

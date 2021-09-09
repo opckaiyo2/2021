@@ -1,11 +1,6 @@
 from multiprocessing import Process, Manager
 import time
-
-def f(d):
-    d_data = 0
-    while(True):
-        d['1'] = d_data
-        d_data += 1
+from def_f import f
 
 def auto(d):
     while(True):

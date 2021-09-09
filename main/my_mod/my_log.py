@@ -1,9 +1,9 @@
 #coding: utf-8
 import datetime
 
-def log_txt(ard_data, gps_data):
+def log_txt(ard_data):
     # log作成時刻がファイル名のファイル作成
-    filiname = "/home/pi/2021/main/log" + str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".txt") 
+    filiname = "/home/pi/2021/main/log/" + str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".txt") 
     # 同じデータを書き込まないように前ループのデータ保管用変数
     old_ard_data = ""
     
@@ -14,12 +14,9 @@ def log_txt(ard_data, gps_data):
             while(True):
                 # 同じデータを書き込もうとしてないかチェック
                 if(old_ard_data != ard_data):
-                    # gpsとセンサデータを統合
-                    ard_data["lat"] = gps_data["lat"]
-                    ard_data["lng"] = gps_data["lng"]
-                    ard_data["alt"] = gps_data["alt"]
                     # 改行
-                    f.write(ard_data,"\n")
+                    f.write(str(ard_data))
+                    f.write("\n")
 
     except Exception as e:
         print("\n")

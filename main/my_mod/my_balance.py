@@ -31,10 +31,9 @@ class PID_yaw:
         self.e1 = 0.00
         self.e2 = 0.00
 
-        self.Kp = yaw_pid.get('Kp')
-        self.Ki = yaw_pid.get('Ki')
-        self.Kd = yaw_pid.get('Kd')
-
+        self.Kp = float(yaw_pid.get('Kp'))
+        self.Ki = float(yaw_pid.get('Ki'))
+        self.Kd = float(yaw_pid.get('Kd'))
     def go_yaw(self, goal, data):
 
         # センサから得た現在の方向
@@ -112,9 +111,9 @@ class PID_depth:
         self.e1 = 0.00
         self.e2 = 0.00
 
-        self.Kp = depth_pid.get('Kp')
-        self.Ki = depth_pid.get('Ki')
-        self.Kd = depth_pid.get('Kd')
+        self.Kp = float(depth_pid.get('Kp'))
+        self.Ki = float(depth_pid.get('Ki'))
+        self.Kd = float(depth_pid.get('Kd'))
 
     def go_depth(self, goal, data):
         # 初期値

@@ -21,7 +21,7 @@ class OF:
     def __init__(self):
         # 設定ファイル読み込み-------------------------------------------
         INI_FILE = "/home/pi/2021/main/config/config.ini"
-        inifile = configparser.SafeConfigParser()
+        inifile = configparser.ConfigParser()
         inifile.read(INI_FILE,encoding="utf-8")
 
         gps_initial = ast.literal_eval(inifile.get("operation", "gps_initial"))
@@ -47,7 +47,7 @@ class OF:
 
     # コンフィグファイルで設定した初期・潜水・浮上位置に向かう関数
     # 引数 maker:どの位置に向かうかself.gps_maker(辞書型)のkeyの値 **sen_data:センサの値(辞書型)
-    def gps_position(self,maker,**sen_data):
+    def gps_position(self,maker,sen_data):
         while(True):
             # gpsとconfig.iniの初期位置比較
             gps = self.waypoint(sen_data["lat"],sen_data["lon"],
@@ -64,27 +64,27 @@ class OF:
 
             # 直進 進む強さは電流計の値を見て調整できるようにしたい
             # pidしながら直進
-            MV = self.pid_yaw.go_yaw(gps["azimuth"],sen_data["yaw"])
+            MV = self.pid_yaw.go_yaw(gps["azimuth"],sen_data["x"])
             self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed,self.speed)
 
     # 機体の向きを変える関数
     # 引数 goal:向きたい角度 **sen_data:センサの値(辞書型)
-    def rotate_yaw(self,goal,**sen_data):
+    def rotate_yaw(self,goal,sen_data):
         while(True):
             # ゴールと誤差が5°以内なら終了
-            if((goal-sen_data["yaw"]) < 5):
+            if((goal-sen_data["x"]) < 5):
                 # 角度調節した後はモータが止まってほしいためself.motor.stop()
                 self.motor.stop()
                 break
 
             # 方位角とオイラー角を合わせないといけない?
             # pidで角度調整
-            MV = self.pid_yaw.go_yaw(goal,sen_data["yaw"])
+            MV = self.pid_yaw.go_yaw(goal,sen_data["x"])
             self.motor.spinturn(MV)
 
     # コンフィグファイルで設定した深さに機体を潜らせる関数
     # 引数 **sen_data:センサの値(辞書型)
-    def diving(self,**sen_data):
+    def diving(self,sen_data):
         # 潜る前の圧力センサの値を保持(浮上時に使用)
         self.initial_depth = sen_data["depth"]
         while(True):
@@ -100,7 +100,7 @@ class OF:
 
     # 水に潜った状態で前に進む関数
     # 引数 rotate:どのくらい進むかself.rotate(辞書型)のkeyの値 yaw:機体に向き(pidの向き) **sen_data:センサの値(辞書型) 
-    def diving_advance(self,rotate,yaw,**sen_data):
+    def diving_advance(self,rotate,yaw,sen_data):
         # 潜水して進む前のモータ回転数を記録(合計値)
         rot = list(range(4))
         for i in range(4):
@@ -129,12 +129,12 @@ class OF:
             self.motor.up_down(MV)
 
             # 方向pid
-            MV = self.pid_yaw.go_yaw(yaw,sen_data["yaw"])
+            MV = self.pid_yaw.go_yaw(yaw,sen_data["x"])
             self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed,self.speed)
 
     # 浮上する関数
     # 引数 **sen_data:センサの値(辞書型)
-    def ascend(self,**sen_data):
+    def ascend(self,sen_data):
         while(True):
             # 目標の深さになったら終了
             if(abs(self.initial_depth-sen_data["depth"]) < 0.2):
@@ -148,7 +148,7 @@ class OF:
 
     # 浮上後設定した浮上位置か比較し、再潜水を行う関数
     # 引数 maker:浮上位置の設定self.gps_maker(辞書型)のkeyの値 yaw:機体の向き(pidの向き) **sen_data:センサの値(辞書型)
-    def re_diving(self,maker,yaw,**sen_data):
+    def re_diving(self,maker,yaw,sen_data):
         while(True):
             # wapoint関数で距離、方位角、逆方位角もとめる(距離と角度)
             gps = self.waypoint(sen_data["lat"],sen_data["lon"],
@@ -174,6 +174,27 @@ class OF:
         azimuth, back_azimuth, distance_2d = g.inv(s_lat,s_lon, g_lat, g_lon)
         gps = {'azimuth': azimuth, 'back_azimuth': back_azimuth,'distance_2d': distance_2d}
         return gps
+
+    # モータの回転数合計を見て既定の回転数に達すまでモータ回し続ける
+    # 深さを調節するモータはpidで回すので前進後進モータだけとめる
+    # 引数 gola:目的の回転回数 **sen_data:センサ値(辞書型)
+    def pid_goback_rotate_stop(self,rotate,x,sen_data):
+        self.rot_ini = 0
+        self.rot = 0
+        for i in range(4):
+            self.rot_ini += sen_data["rot"+str(i)]
+
+        while(True):
+            for i in range(4):
+                self.rot += sen_data["rot"+str(i)]
+
+            if (self.rot - self.rot_ini) >= rotate:
+                self.motor.stop_go_back()
+                break
+
+            MV = self.pid_yaw.go_yaw(x,sen_data["x"])
+            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed,self.speed)
+
 
 if __name__ == "__main__":
     of = OF()

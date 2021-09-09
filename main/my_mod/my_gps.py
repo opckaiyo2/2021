@@ -1,13 +1,12 @@
 #coding: utf-8
-from datetime import datetime
+import serial
 import gps
 import ast
 import time
 
 # GPSのデータを取得して還す
 def get_gps(sen_data):
-    session = gps.gps("localhost", "2947")
-    session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
+    ser = serial.Serial("/dev/ttyACM0",115200,timeout=1)
     lat = ""
     lon = ""
     alt = ""
@@ -15,24 +14,18 @@ def get_gps(sen_data):
         try:
 
             # gps データ取得
-            report = next(session)
-            # print(report)
-            if report['class'] == 'TPV':
-                if hasattr(report, 'lat'):
-                    lat = float(report.lat)
-                if hasattr(report, 'lon'):
-                    lon = float(report.lon)
-                if hasattr(report, 'alt'):
-                    alt = float(report.alt)
-                if( lat!=""and lon!="" and alt!="" ):
-                    gps_data_dict = {"lat":lat, "lng":lon, "alt":alt}
-                    sen_data.update(gps_data_dict)
+            str = ser.readline().decode('unicode-escape')
+            print(str)
+            print(type(str))
+
         except KeyError:
-                pass
+            pass
         except KeyboardInterrupt:
             quit()
-        except StopIteration:
-            session = None
-            print("\n")
-            print("my_gps.py get_gps try error : GPSD has terminated!!")
-            print("\n")
+        except Exception as e:
+            print(e)
+            break
+
+if __name__ == "__main__":
+    sen_data = {"x":55}
+    get_gps(sen_data)

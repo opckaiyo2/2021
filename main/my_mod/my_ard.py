@@ -14,7 +14,8 @@ def get_sen(sen_data):
             # 文字型から辞書型に変換
             dic_date = ast.literal_eval(String_data)
             # multiprocessでprocess間値共有 main.pyで設定
-            sen_data = dic_date
+            for key in dic_date.keys():
+                sen_data[key] = dic_date[key]
         except KeyboardInterrupt as key:
             break
 
@@ -24,4 +25,5 @@ def get_sen(sen_data):
             print("\n")
 
 if __name__ == "__main__":
-    pass
+    sen_data = {}
+    get_sen(sen_data)

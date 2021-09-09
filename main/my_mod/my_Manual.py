@@ -1,6 +1,6 @@
 #coding: utf-8
 import configparser
-from personal.kuba.test.serial.my_get_serial import String_data
+#from personal.kuba.test.serial.my_get_serial import String_data
 import select
 import serial
 import tty
