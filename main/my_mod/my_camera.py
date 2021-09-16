@@ -25,9 +25,6 @@ def cap_main(hoop_Coordinate):
                 for i in circles[0,:]:
                     # draw the outer circle
                     cv2.circle(gray,(i[0],i[1]),i[2],(0,255,0),2)
-                
-            cv2.imshow("frame", gray)
-            cv2.waitKey(1)
             #"""
 
     except Exception as e:

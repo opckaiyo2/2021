@@ -14,18 +14,25 @@ def Teaching(sen_data):
     of = OF()
     motor = Motor()
 
-    # 初期向きの暗記
-    time.sleep(3)
-    while(not('x' in sen_data)):
+    # データがすべて揃うまでループ endtimeはデータの一番後列
+    while(not('endtime' in sen_data)):
         pass
 
+    # 初期向きの暗記
     ini_x = sen_data["x"]
 
     # 初期向きの反対(Uターンなどで使う)
+    ini_opx = 0
+
     if ini_x < 180:
         ini_opx = ini_x+180
     elif ini_x > 180:
         ini_opx = ini_x-180
+    elif ini_x == 180:
+        ini_opx = 180
+
+    print("ini_x : "+str(ini_x))
+    print("ini_opx : "+str(ini_opx))
 
     # 設定ファイル読み込み-------------------------------------------
 
@@ -44,53 +51,52 @@ def Teaching(sen_data):
 
     # 潜水位置まで-------------------------------------------------
     print("潜水位置まで")
-    of.pid_goback_rotate_stop(0,ini_x,sen_data)
-    print("潜水位置まで")
+    of.pid_goback_rotate_stop(100,ini_x,sen_data)
     # 潜水位置まで-------------------------------------------------
 
     # 潜水位置まで潜水---------------------------------------------
-    of.diving(sen_data)
     print("潜水")
+    of.diving(sen_data)
     # 潜水位置まで潜水---------------------------------------------
 
     # 浮上位置まで------------------------------------------------
-    of.pid_goback_rotate_stop(0,ini_x,sen_data)
     print("浮上位置")
+    of.pid_goback_rotate_stop(0,ini_x,sen_data)
     # 浮上位置まで------------------------------------------------
 
     # 浮上-------------------------------------------------------
-    of.ascend(sen_data)
     print("浮上")
+    of.ascend(sen_data)
     # 浮上-------------------------------------------------------
 
     # Uターン----------------------------------------------------
-    of.rotate_yaw(ini_opx,sen_data)
     print("Uターン")
+    of.rotate_yaw(ini_opx,sen_data)
     # Uターン----------------------------------------------------
 
     # 潜水位置まで-------------------------------------------------
-    of.pid_goback_rotate_stop(0,ini_x,sen_data)
     print("潜水位置")
+    of.pid_goback_rotate_stop(0,ini_opx,sen_data)
     # 潜水位置まで-------------------------------------------------
 
     # 潜水位置まで潜水---------------------------------------------
-    of.diving(sen_data)
     print("潜水")
+    of.diving(sen_data)
     # 潜水位置まで潜水---------------------------------------------
 
     # 浮上位置まで------------------------------------------------
-    of.pid_goback_rotate_stop(0,ini_x,sen_data)
     print("浮上位置")
+    of.pid_goback_rotate_stop(0,ini_opx,sen_data)
     # 浮上位置まで------------------------------------------------
 
     # 浮上-------------------------------------------------------
-    of.ascend(sen_data)
     print("浮上")
+    of.ascend(sen_data)
     # 浮上-------------------------------------------------------
 
     # スタート位置まで--------------------------------------------
-    of.pid_goback_rotate_stop(0,ini_x,sen_data)
     print("スタート位置")
+    of.pid_goback_rotate_stop(0,ini_opx,sen_data)
     # スタート位置まで--------------------------------------------
 
     # すべてのモータstop

@@ -8,3 +8,4 @@ if __name__ == "__main__":
     dict_data = ast.literal_eval(string_data)
 
     print(dict_data)
+    print(dict_data["1"]

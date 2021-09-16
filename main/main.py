@@ -56,7 +56,7 @@ def main():
         # ardからデータ取得
         ard_process = Process(target=get_sen, daemon=True, args=(sen_data,))
         # gpsからデータ取得
-        #gps_process = Process(target=get_gps, daemon=True, args=(sen_data,))
+        gps_process = Process(target=get_gps, daemon=True, args=(sen_data,))
         # カメラ
         camera_process = Process(target=cap_main, daemon=True, args=(hoop_Coordinate,))
         # データログ

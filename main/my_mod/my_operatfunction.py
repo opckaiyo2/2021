@@ -72,7 +72,7 @@ class OF:
     def rotate_yaw(self,goal,sen_data):
         while(True):
             # ゴールと誤差が5°以内なら終了
-            if((goal-sen_data["x"]) < 5):
+            if(abs(goal-sen_data["x"]) < 5):
                 # 角度調節した後はモータが止まってほしいためself.motor.stop()
                 self.motor.stop()
                 break
@@ -185,6 +185,7 @@ class OF:
             self.rot_ini += sen_data["rot"+str(i)]
 
         while(True):
+            self.rot = 0
             for i in range(4):
                 self.rot += sen_data["rot"+str(i)]
 
