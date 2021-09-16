@@ -1,22 +1,24 @@
 #coding: utf-8
-import serial
-import gps
-import ast
-import time
+from typing import Type
+from gps3 import gps3
 
 # GPSのデータを取得して還す
 def get_gps(sen_data):
-    ser = serial.Serial("/dev/ttyACM0",115200,timeout=1)
-    lat = ""
-    lon = ""
-    alt = ""
+    gps_socket = gps3.GPSDSocket()
+    data_stream = gps3.DataStream()
+    gps_socket.connect()
+    gps_socket.watch()
+
     while True:
         try:
 
             # gps データ取得
-            str = ser.readline().decode('unicode-escape')
-            print(str)
-            print(type(str))
+            for new_data in gps_socket:
+                if new_data:
+                    data_stream.unpack(new_data)
+                    sen_data['lat'] = data_stream.TPV['lat']
+                    sen_data['lon'] = data_stream.TPV['lon']
+                    print(sen_data)
 
         except KeyError:
             pass

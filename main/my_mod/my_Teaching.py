@@ -31,9 +31,6 @@ def Teaching(sen_data):
     elif ini_x == 180:
         ini_opx = 180
 
-    print("ini_x : "+str(ini_x))
-    print("ini_opx : "+str(ini_opx))
-
     # 設定ファイル読み込み-------------------------------------------
 
     INI_FILE = "/home/pi/2021/main/config/config.ini"

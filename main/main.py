@@ -64,7 +64,7 @@ def main():
 
         # 各プロセススタート
         ard_process.start()
-        #gps_process.start()
+        gps_process.start()
         camera_process.start()
         log_process.start()
 
