@@ -39,6 +39,12 @@ def Teaching(sen_data):
 
     # どのデータを読み込むか
     rotate = eval(inifile.get("teaching","rotate"))
+    print("モータ(前進後進に関係ある4つ)の回転数合計")
+    print("潜水位置まで\t"+str(rotate[0])+"回転")
+    print("潜水中　浮上位置まで\t"+str(rotate[1])+"回転")
+    print("Uターンあと　潜水位置まで\t"+str(rotate[2])+"回転")
+    print("潜水中　浮上位置まで\t"+str(rotate[3])+"回転")
+    print("スタート位置まで\t"+str(rotate[4])+"回転\n\n")
 
     # 設定ファイル読み込み-------------------------------------------
 
@@ -48,7 +54,7 @@ def Teaching(sen_data):
 
     # 潜水位置まで-------------------------------------------------
     print("潜水位置まで")
-    of.rotate_advance(100,ini_x,sen_data)
+    of.rotate_advance(rotate[0],ini_x,sen_data)
     # 潜水位置まで-------------------------------------------------
 
     # 潜水位置まで潜水---------------------------------------------
@@ -58,7 +64,7 @@ def Teaching(sen_data):
 
     # 浮上位置まで------------------------------------------------
     print("浮上位置まで")
-    of.diving_advance(0,ini_x,sen_data)
+    of.diving_advance(rotate[1],ini_x,sen_data)
     # 浮上位置まで------------------------------------------------
 
     # 浮上-------------------------------------------------------
@@ -73,7 +79,7 @@ def Teaching(sen_data):
 
     # 潜水位置まで-------------------------------------------------
     print("潜水位置まで")
-    of.rotate_advance(0,ini_opx,sen_data)
+    of.rotate_advance(rotate[2],ini_opx,sen_data)
     # 潜水位置まで-------------------------------------------------
 
     # 潜水位置まで潜水---------------------------------------------
@@ -83,7 +89,7 @@ def Teaching(sen_data):
 
     # 浮上位置まで------------------------------------------------
     print("浮上位置まで")
-    of.diving_advance(0,ini_opx,sen_data)
+    of.diving_advance(rotate[3],ini_opx,sen_data)
     # 浮上位置まで------------------------------------------------
 
     # 浮上-------------------------------------------------------
@@ -93,7 +99,7 @@ def Teaching(sen_data):
 
     # スタート位置まで--------------------------------------------
     print("スタート位置まで")
-    of.rotate_advance(0,ini_opx,sen_data)
+    of.rotate_advance(rotate[4],ini_opx,sen_data)
     # スタート位置まで--------------------------------------------
 
     # すべてのモータstop

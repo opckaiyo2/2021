@@ -18,7 +18,6 @@ def get_gps(sen_data):
                     data_stream.unpack(new_data)
                     sen_data['lat'] = data_stream.TPV['lat']
                     sen_data['lon'] = data_stream.TPV['lon']
-                    print(sen_data)
 
         except KeyError:
             pass

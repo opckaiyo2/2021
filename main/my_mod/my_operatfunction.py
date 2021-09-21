@@ -111,7 +111,7 @@ class OF:
             rot = 0
             # 現在のモータ回転数を記録
             for i in range(4):
-                rot[i] = sen_data["rot"+str(i)]
+                rot += sen_data["rot"+str(i)]
 
             # モータ回転数が規定値を超えていれば終了
             if(rot - rot_ini) >= rotate:
