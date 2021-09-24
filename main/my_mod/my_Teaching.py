@@ -28,8 +28,8 @@ def Teaching(sen_data):
         ini_opx = ini_x+180
     elif ini_x > 180:
         ini_opx = ini_x-180
-    elif ini_x == 180:
-        ini_opx = 180
+    else:
+        ini_opx = (ini_x+180) % 360
 
     # 設定ファイル読み込み-------------------------------------------
 

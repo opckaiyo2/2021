@@ -33,6 +33,7 @@ inifile = configparser.ConfigParser()
 inifile.read(INI_FILE,encoding="utf-8")
 
 operation = inifile.getint("main", "operation")
+log_flag = inifile.getboolean("main", "log_flag")
 
 # 設定ファイル読み込み-------------------------------------------
 
@@ -66,7 +67,8 @@ def main():
         ard_process.start()
         gps_process.start()
         camera_process.start()
-        log_process.start()
+        if log_flag:
+            log_process.start()
 
         # 必要な機能のインスタンス作成
         # main.pyの中でモータは制御しないつもりだが緊急停止用
