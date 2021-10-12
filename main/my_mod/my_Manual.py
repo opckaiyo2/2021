@@ -1,93 +1,120 @@
 #coding: utf-8
 import configparser
-#from personal.kuba.test.serial.my_get_serial import String_data
-import select
-import serial
+import termios
 import tty
 import sys
-import ast
-import gps
+import time
 
 # 自作関数の場所をsystempathに追加
 sys.path.append("/home/pi/2021/main/my_mod")
 # motor制御
 from my_motor import Motor
 
-def Manual():
+def Manual(sen_data):
+    motor = Motor()
+
+    while(not('endtime' in sen_data)):
+        pass
+
     # 設定ファイル読み込み-------------------------------------------
 
     INI_FILE = "/home/pi/2021/main/config/config.ini"
     inifile = configparser.SafeConfigParser()
     inifile.read(INI_FILE,encoding="utf-8")
 
-    # key入力かプロボか
-    # モータ回転数をteaching用データとして出力するか
+    log_flag = inifile.getboolean("manual", "log_flag")
     
     # 設定ファイル読み込み-------------------------------------------
 
-
-    # key入力で制御する場合------------------------------------------
-    tty.setcbreak(sys.stdin.fileno())
-
-    ser = serial.Serial('/dev/ttyACM0', 9600)
-
-    motor = Motor()
-    power = 10
+    power = 30
+    ch_state = 0
+    rot = 0
+    log_rotate = {"test":0}
+    log_time = {}
+    start = time.time()
 
     while(True):
-        String_data = ser.readline().decode('utf-8').rstrip()
-        dict_data = ast.literal_eval(String_data)
+        try:
+            fd = sys.stdin.fileno()
+            old_settings = termios.tcgetattr(fd)
+            tty.setcbreak(fd)
+            ch = sys.stdin.read(1)
+            termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 
-        session = gps.gps("localhost", "2947")
-        session.stream(gps.WATCH_ENABLE | gps.WATCH_NEWSTYLE)
-        lat = ""
-        lon = ""
-        alt = ""
-
-        report = next(session)
-        if report['class'] == 'TPV':
-            if hasattr(report, 'lat'):
-                lat = float(report.lat)
-            if hasattr(report, 'lon'):
-                lon = float(report.lon)
-            if hasattr(report, 'alt'):
-                alt = float(report.alt)
-            if( lat!=""and lon!="" and alt!="" ):
-                gps_data_dict = {"lat":lat, "lng":lon, "alt":alt}
-                dict_data.update(gps_data_dict)
-
-        if select.select([sys.stdin],[],[],0) == ([sys.stdin],[],[]):
-            input_key = sys.stdin.read(1)
-
-            if input_key == "w":
+            if ch == "w":
                 motor.go_back(power)
-                print("motor.go_back : ",power)
-            elif input_key == "s":
+                for i in range(4): rot += sen_data["rot"+str(i)]
+                ch_state += 1
+                log_rotate["motor_go_back"+str(ch_state)] = rot
+                log_time[time.time()-start] = "motor_go_back " + str(power)
+            elif ch == "s":
                 motor.go_back(power*-1)
-                print("motor.go_back : ",power*-1)
-            elif input_key == "u":
-                motor.up_down(power)
-                print("motor.up_down : ",power)
-            elif input_key == "d":
-                motor.up_down(power*-1)
-                print("motor.up_down : ",power*-1)
-            elif input_key == "q":
+                for i in range(4): rot += sen_data["rot"+str(i)]
+                ch_state += 1
+                log_rotate["motor_go_back"+str(ch_state)] = rot
+                log_time[time.time()-start] = "motor_go_back " + str(power*-1)
+            elif ch == "q":
                 motor.spinturn(power)
-                print("motor.spinturn : ",power)
-            elif input_key == "e":
+                for i in range(4): rot += sen_data["rot"+str(i)]
+                ch_state += 1
+                log_rotate["motor_spinturn"+str(ch_state)] = rot
+                log_time[time.time()-start] = "motor_spinturn " + str(power)
+            elif ch == "e":
                 motor.spinturn(power*-1)
-                print("motor.spinturn : ",power*-1)
-            elif input_key == "+":
-                power += 10
-                print("motor power up: ",power)
-            elif input_key == "-":
+                for i in range(4): rot += sen_data["rot"+str(i)]
+                ch_state += 1
+                log_rotate["motor_spinturn"+str(ch_state)] = rot
+                log_time[time.time()-start] = "motor_spinturn " + str(power*-1)
+            elif ch == "-":
                 power -= 10
-                print("motor power down: ",power)
-            elif input_key == "p":
-                print(dict_data)
+                print("power : "+str(power))
+            elif ch == "+":
+                power += 10
+                print("power : "+str(power))
+            elif ch == "r":
+                motor.up_down(power)
+                for i in range(4): rot += sen_data["rot"+str(i)]
+                ch_state += 1
+                log_rotate["motor_up_down"+str(ch_state)] = rot
+                log_time[time.time()-start] = "motor_up_down " + str(power)
+            elif ch == "f":
+                motor.up_down(power*-1)
+                for i in range(4): rot += sen_data["rot"+str(i)]
+                ch_state += 1
+                log_rotate["motor_up_down"+str(ch_state)] = rot
+                log_time[time.time()-start] = "motor_up_down " + str(power*-1)
+            elif ch == "u":
+                motor.stop_go_back()
+                for i in range(4): rot += sen_data["rot"+str(i)]
+                ch_state += 1
+                log_rotate["motor_goback_stop"+str(ch_state)] = rot
+                log_time[time.time()-start] = "motor_goback_stop"
+            elif ch == "j":
+                motor.stop_up_down()
+                for i in range(4): rot += sen_data["rot"+str(i)]
+                ch_state += 1
+                log_rotate["motor_updown_stop"+str(ch_state)] = rot
+                log_time[time.time()-start] = "motor_updown_stop"
+            elif ch == "m":
+                motor.stop()
+                for i in range(4): rot += sen_data["rot"+str(i)]
+                ch_state += 1
+                log_rotate["motor_stop"+str(ch_state)] = rot
+                log_time[time.time()-start] = "motor_stop"
+            else:
+                print("対応した操作がありません")
+                print("w : 前進")
+                print("s : 後進")
+                print("q : 旋回左")
+                print("e : 旋回右")
+                print("- : モータ出力 -10")
+                print("+ : モータ出力 +10")
+                print("r : 潜水")
+                print("f : 浮上")
+                print("u : 前進後進モータstop")
+                print("j : 潜水浮上モータstop")
+                print("m : 全てもモータstop")
 
-    # key入力で制御する場合------------------------------------------
-
-
-    # プロボで操作する場合--------------------------------------------
-    # プロボで操作する場合--------------------------------------------
+        except Exception as e:
+            print(log_rotate)
+            motor.stop()

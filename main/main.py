@@ -82,7 +82,7 @@ def main():
             elif(operation == 2):
                 Autonomy(sen_data)
             elif(operation == 3):
-                Manual()
+                Manual(sen_data)
             else:
                 #例外発生分except Exception as eでエラーが検出される
                 raise ValueError("The operation setting value in config.ini is wrong.")

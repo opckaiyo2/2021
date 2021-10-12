@@ -30,7 +30,7 @@ class OF:
         gps_test = ast.literal_eval(inifile.get("operation", "gps_test"))
         
         self.speed = inifile.getfloat("operation", "defalut_speed")
-        self.depth = inifile.getint("operation", "depth")
+        self.depth = inifile.getfloat("operation", "depth")
 
         self.rotate = {"ava_rot":inifile.getint("autonomy","ava_rot"),
                     "re_rot":inifile.getint("autonomy","re_rot")}
@@ -72,15 +72,15 @@ class OF:
     def rotate_yaw(self,goal,sen_data):
         while(True):
             # ゴールと誤差が5°以内なら終了
-            if(abs(goal-sen_data["x"]) < 5):
+            if(abs(goal-sen_data["x"]) < 10):
                 # 角度調節した後はモータが止まってほしいためself.motor.stop()
                 self.motor.stop()
                 break
 
             # 方位角とオイラー角を合わせないといけない?
             # pidで角度調整
-            MV = self.pid_yaw.go_yaw(goal,sen_data["x"])
-            self.motor.spinturn(MV)
+            #MV = self.pid_yaw.go_yaw(goal,sen_data["x"])
+            self.motor.spinturn(20)
 
     # コンフィグファイルで設定した深さに機体を潜らせる関数
     # 引数 sen_data:センサの値(辞書型)
@@ -204,8 +204,9 @@ if __name__ == "__main__":
 
             ard_process.start()
             gps_process.start()
-
-            motor.go_back(10)
+            
+            of.rotate_yaw(180,sen_sata)
+            #motor.go_back(10)
 
             # デバック順番---------------
             # azimuth 210.490025 back 30.4546277777778 distance 15,719.204m になるはず

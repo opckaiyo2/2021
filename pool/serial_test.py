@@ -34,7 +34,7 @@ if __name__ == "__main__":
             #debagprint
             print(dic_date)
 
-            motor.forward_each(power,power,power,power)
+            #motor.forward_each(power,power,power,power)
 
             with open(filiname, 'a') as f:
                 f.writelines(str(dic_date))
