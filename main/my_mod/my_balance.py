@@ -130,9 +130,9 @@ class PID_depth:
         self.e = self.map_depth(goal) - now_depth
 
         self.M = self.M1 + self.Kp * (self.e-self.e1) + self.Ki * self.e + self.Kd * ((self.e-self.e1) - (self.e1-self.e2))
-        # print(M)
-        if self.M > 15:
-            self.M = 15
+
+        if self.M > 30:
+            self.M = 30
         elif self.M < 0:
             self.M = 0
 

@@ -22,12 +22,12 @@ def Test(sen_data):
     print("潜水")
     of.diving(sen_data)
 
-    time.sleep(5)
+    time.sleep(10)
 
     # 浮上-------------------------------------------------------
     print("浮上")
     of.ascend(sen_data)
 
-    time.sleep(5)
+    time.sleep(10)
     # すべてのモータstop
     motor.stop()

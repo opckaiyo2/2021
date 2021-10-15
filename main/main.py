@@ -25,6 +25,8 @@ from my_Teaching import Teaching
 from my_Autonomy import Autonomy
 # 手動
 from my_Manual import Manual
+#潜水テスト
+from my_Test import Test
 
 # 設定ファイル読み込み-------------------------------------------
 
@@ -83,6 +85,8 @@ def main():
                 Autonomy(sen_data)
             elif(operation == 3):
                 Manual(sen_data)
+            elif(operation == 4):
+                Test(sen_data)
             else:
                 #例外発生分except Exception as eでエラーが検出される
                 raise ValueError("The operation setting value in config.ini is wrong.")
