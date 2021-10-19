@@ -4,6 +4,7 @@ import ast
 import configparser
 from pyproj import Geod
 from multiprocessing import Process, Manager, Value
+import time
 
 # 自作関数の場所をsystempathに追加
 sys.path.append("/home/pi/2021/main/my_mod")
@@ -81,6 +82,8 @@ class OF:
             # pidで角度調整
             #MV = self.pid_yaw.go_yaw(goal,sen_data["x"])
             self.motor.spinturn(20)
+            #print("sen:"+str(sen_data["x"]))
+            #print("goal:"+str(goal))
 
     # コンフィグファイルで設定した深さに機体を潜らせる関数
     # 引数 sen_data:センサの値(辞書型)
@@ -93,10 +96,13 @@ class OF:
             if(abs(self.depth-sen_data["depth"]) < 0.2):
                 # 潜水後も潜り続けてほしいためモータはとめない
                 break
+            if(sen_data["depth"] > self.depth):
+                break
 
             # 深さpid
             MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
             self.motor.up_down(MV)
+            #print(MV)
 
     # 水に潜った状態で前に進む関数
     # 引数 rotate:どのくらい進むかself.rotate(辞書型)のkeyの値 yaw:機体に向き(pidの向き) sen_data:センサの値(辞書型) 
@@ -122,6 +128,10 @@ class OF:
 
             # 深さpid
             MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
+
+            if(sen_data["depth"] > self.depth):
+                MV = 0
+
             self.motor.up_down(MV)
 
             # 方向pid
@@ -136,11 +146,13 @@ class OF:
             if(abs(self.initial_depth-sen_data["depth"]) < 0.2):
                 # 浮上あとは機体は浮くようになっているためモータストップ
                 self.motor.stop_up_down()
+                time.sleep(1)
                 break
 
             # 深さpid
             MV = self.pid_depth.go_depth(self.initial_depth,sen_data["depth"])
-            self.motor.up_down(MV)
+            self.motor.up_down(0)
+            #print(-MV)
 
     # 浮上後設定した浮上位置か比較し、再潜水を行う関数
     # 引数 maker:浮上位置の設定self.gps_maker(辞書型)のkeyの値 yaw:機体の向き(pidの向き) sen_data:センサの値(辞書型)

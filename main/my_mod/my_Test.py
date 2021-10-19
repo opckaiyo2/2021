@@ -18,16 +18,19 @@ def Test(sen_data):
     while(not('endtime' in sen_data)):
         pass
 
-    # 潜水---------------------------------------------
-    print("潜水")
-    of.diving(sen_data)
+    while(True):
+        try:
+            # 潜水---------------------------------------------
+            print("潜水")
+            motor.up_down(20)
 
-    time.sleep(10)
+            time.sleep(3)
 
-    # 浮上-------------------------------------------------------
-    print("浮上")
-    of.ascend(sen_data)
+            # 浮上-------------------------------------------------------
+            print("浮上")
+            motor.up_down(-20)
 
-    time.sleep(10)
-    # すべてのモータstop
-    motor.stop()
+            time.sleep(3)
+            # すべてのモータstop
+        except KeyboardInterrupt as e:
+            motor.stop()
