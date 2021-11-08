@@ -1,9 +1,11 @@
 #coding: utf-8
-from concurrent import futures
+# 自作関数読み込みのためのライブラリ
 import sys
-import time
+# エラー検出用のライブラリ
 import traceback
+# コンフィグファイル使用のライブラリ
 import configparser
+# マルチプロセスのためのライブラリ
 from multiprocessing import Process, Manager, Value
 
 # 自作関数の場所をsystempathに追加
@@ -30,11 +32,16 @@ from my_Test import Tinou
 
 # 設定ファイル読み込み-------------------------------------------
 
+# コンフィグファイルの場所
 INI_FILE = "/home/pi/2021/main/config/config.ini"
+# クラスをインスタンス化
 inifile = configparser.ConfigParser()
+#  コンフィグファイルの場所 文字コードを指定しコンフィグ読み込み
 inifile.read(INI_FILE,encoding="utf-8")
 
+# コンフィグのmain項目のoperationを読み込み(実行するプログラムの種類)
 operation = inifile.getint("main", "operation")
+# コンフィグのmain項目のlog_flagを読み込み(ログ生成するかのフラグ)
 log_flag = inifile.getboolean("main", "log_flag")
 
 # 設定ファイル読み込み-------------------------------------------
@@ -54,6 +61,7 @@ def main():
         sen_data = manager.dict()
         # 知能計測チャレンジカメラフラグ
         cap_flag = Value('i',0)
+        # カメラで認識した物体の状態格納用
         X = Value('i',0)
         Y = Value('i',0)
         S = Value('i',0)
@@ -64,14 +72,18 @@ def main():
         # gpsからデータ取得
         gps_process = Process(target=get_gps, daemon=True, args=(sen_data,))
         # カメラ
-        #camera_process = Process(target=cap_main, daemon=True, args=(cap_flag,X,Y,S,))
+        camera_process = Process(target=cap_main, daemon=True, args=(cap_flag,X,Y,S,))
         # データログ
         log_process = Process(target=log_txt, daemon=True, args=(sen_data,))
 
         # 各プロセススタート
+        # ardからデータ取得
         ard_process.start()
+        # gpsからデータ取得
         gps_process.start()
-        #camera_process.start()
+        # カメラ
+        camera_process.start()
+        # データログ(データフラグを使用することでON/OFF切り替え)
         if log_flag:
             log_process.start()
 
@@ -79,16 +91,22 @@ def main():
         # main.pyの中でモータは制御しないつもりだが緊急停止用
         motor = Motor()
 
+        # try文はexceptとセットで使われエラーが発生した際にエラーによって実行する処理を変えることができる。
+        # 特にエラーでプログラムが終了した際にモータをストップできるように使用している。
         try:
             # どの操作方法で動かすか---------------------------------
             
             if(operation == 1):
+                # 2021/my_mod/my_Teaching.pyの関数Teachingを呼び出す。sen_data(センサデータ)を渡す。
                 Teaching(sen_data)
             elif(operation == 2):
+                # 2021/my_mod/my_Autonomy.pyの関数Autonomyを呼び出す。sen_data(センサデータ)を渡す。
                 Autonomy(sen_data)
             elif(operation == 3):
+                # 2021/my_mod/my_Manual.pyの関数Manualを呼び出す。sen_data(センサデータ)を渡す。
                 Manual(sen_data)
             elif(operation == 4):
+                # 2021/my_mod/my_Test.pyの関数Tinouを呼び出す。sen_data(センサデータ)などを渡す。
                 Tinou(sen_data,cap_flag,X,Y,S)
             else:
                 #例外発生分except Exception as eでエラーが検出される
@@ -97,12 +115,18 @@ def main():
             # どの操作方法で動かすか---------------------------------
             
         except KeyboardInterrupt:
+            # キーボードエラー(Ctrl+Cなどでプログラムを終了させた)時モータストップ
             motor.stop()
         except Exception as e:
+            # その他すべてのエラー時モータストップ
             motor.stop()
+            # 詳細エラー内容を表示
             print(traceback.format_exc())
+            # 見やすさ改善改行
             print("\n")
+            # 簡易エラー内容を表示
             print("main.py main try error : ",e)
+            # 見やすさ改善改行
             print("\n")
 
 

@@ -13,11 +13,12 @@ def get_sen(sen_data):
             String_data = ser.readline().decode('utf-8').rstrip()
             # 文字型から辞書型に変換
             dic_date = ast.literal_eval(String_data)
-            print("\t\tard : "+str(dic_date["endtime"]))
+            #print("\rard : "+str(String_data),end="")
             # multiprocessでprocess間値共有 main.pyで設定
             for key in dic_date.keys():
                 sen_data[key] = dic_date[key]
-                #print("ard: "+str(sen_data["rot0"]))
+
+            #print("\rard > "+str(sen_data["rot2"]),end="")
 
         except KeyboardInterrupt as key:
             break

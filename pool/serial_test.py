@@ -17,13 +17,13 @@ if __name__ == "__main__":
 
     motor = Motor()
 
-    power = 30
+    power = 15
     print("motor power : ",power)
     
     while True:
         
         try:
-            #motor.forward_each(power,power,power,power)
+            motor.forward_each(power,power,power,power)
             #motor.up(power)
 
             #arduinoから一行読み取り
@@ -32,7 +32,8 @@ if __name__ == "__main__":
             #print(String_data)
             dic_date = ast.literal_eval(String_data)
             #debagprint
-            print(dic_date["x"])
+            print(dic_date)
+            print("\n\n")
 
             #motor.forward_each(power,power,power,power)
 

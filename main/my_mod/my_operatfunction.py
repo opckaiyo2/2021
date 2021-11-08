@@ -129,8 +129,7 @@ class OF:
             for i in range(4):
                 rot += sen_data["rot"+str(i)]
 
-            print("rot : "+str(rot))
-            print("\n\n")
+            print("\rrotate : "+str(rot-rot_ini),end="")
 
             # モータ回転数が規定値を超えていれば終了
             if(rot - rot_ini) >= rotate:
@@ -222,11 +221,12 @@ class OF:
                 self.motor.stop_go_back()
                 break
 
+            print("\rrotate : "+str(rot-rot_ini),end="")
+
             MV = pid_yaw.go_yaw(x,sen_data["x"])
             #MV = 0
             if(abs(sen_data["x"]-x) < 5):
                 MV = 0
-            print("\t\tmy_op : "+str(sen_data["endtime"]))
             self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
 
     def diving2(self,goal,sen_data):
