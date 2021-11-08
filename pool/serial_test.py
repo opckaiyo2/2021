@@ -13,7 +13,7 @@ from motor_controller import Motor
 if __name__ == "__main__":
     filiname = "/home/pi/2021/pool/my_log/" + str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".txt")
     #arduino接続
-    ser = serial.Serial('/dev/ttyACM0', 9600)
+    ser = serial.Serial('/dev/ttyACM0', 115200)
 
     motor = Motor()
 
@@ -29,10 +29,10 @@ if __name__ == "__main__":
             #arduinoから一行読み取り
             String_data = ser.readline().decode('utf-8').rstrip()
             #文字列から辞書型に変換
-            print(String_data)
+            #print(String_data)
             dic_date = ast.literal_eval(String_data)
             #debagprint
-            print(dic_date)
+            print(dic_date["x"])
 
             #motor.forward_each(power,power,power,power)
 

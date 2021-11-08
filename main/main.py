@@ -26,7 +26,7 @@ from my_Autonomy import Autonomy
 # 手動
 from my_Manual import Manual
 #潜水テスト
-from my_Test import Test
+from my_Test import Tinou
 
 # 設定ファイル読み込み-------------------------------------------
 
@@ -52,8 +52,11 @@ def main():
         # プロセス間の通信設定
         # ard_senser,gpsデータ格納用
         sen_data = manager.dict()
-        # 知能計測チャレンジ フラフープ中心座標
-        hoop_Coordinate = manager.dict()
+        # 知能計測チャレンジカメラフラグ
+        cap_flag = Value('i',0)
+        X = Value('i',0)
+        Y = Value('i',0)
+        S = Value('i',0)
 
         # 各プロセスオブジェクト作成
         # ardからデータ取得
@@ -61,14 +64,14 @@ def main():
         # gpsからデータ取得
         gps_process = Process(target=get_gps, daemon=True, args=(sen_data,))
         # カメラ
-        camera_process = Process(target=cap_main, daemon=True, args=(hoop_Coordinate,))
+        #camera_process = Process(target=cap_main, daemon=True, args=(cap_flag,X,Y,S,))
         # データログ
         log_process = Process(target=log_txt, daemon=True, args=(sen_data,))
 
         # 各プロセススタート
         ard_process.start()
         gps_process.start()
-        camera_process.start()
+        #camera_process.start()
         if log_flag:
             log_process.start()
 
@@ -86,7 +89,7 @@ def main():
             elif(operation == 3):
                 Manual(sen_data)
             elif(operation == 4):
-                Test(sen_data)
+                Tinou(sen_data,cap_flag,X,Y,S)
             else:
                 #例外発生分except Exception as eでエラーが検出される
                 raise ValueError("The operation setting value in config.ini is wrong.")

@@ -131,8 +131,8 @@ class PID_depth:
 
         self.M = self.M1 + self.Kp * (self.e-self.e1) + self.Ki * self.e + self.Kd * ((self.e-self.e1) - (self.e1-self.e2))
 
-        if self.M > 70:
-            self.M = 70
+        if self.M > 80:
+            self.M = 80
         elif self.M < 0:
             self.M = 0
 

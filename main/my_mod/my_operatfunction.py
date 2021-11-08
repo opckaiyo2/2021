@@ -42,7 +42,7 @@ class OF:
                     "test":gps_test}
         # 設定ファイル読み込み-------------------------------------------
 
-        self.pid_yaw = PID_yaw()
+        #self.pid_yaw = PID_yaw()
         self.pid_depth = PID_depth()
         self.motor = Motor()
 
@@ -66,14 +66,23 @@ class OF:
             # 直進 進む強さは電流計の値を見て調整できるようにしたい
             # pidしながら直進
             MV = self.pid_yaw.go_yaw(gps["azimuth"],sen_data["x"])
-            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed,self.speed)
+            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
 
     # 機体の向きを変える関数
     # 引数 goal:向きたい角度 sen_data:センサの値(辞書型)
     def rotate_yaw(self,goal,sen_data):
+        if sen_data["x"] < 190:
+            goal = sen_data["x"] + 190
+        else:
+            goal = sen_data["x"] - 190
+
+        self.goal = goal
+        print("start : "+str(sen_data["x"]))
+        print("goal : "+str(self.goal))
+        print("\n\n")
         while(True):
             # ゴールと誤差が5°以内なら終了
-            if(abs(goal-sen_data["x"]) < 10):
+            if(abs(self.goal-sen_data["x"]) < 20):
                 # 角度調節した後はモータが止まってほしいためself.motor.stop()
                 self.motor.stop()
                 break
@@ -81,7 +90,7 @@ class OF:
             # 方位角とオイラー角を合わせないといけない?
             # pidで角度調整
             #MV = self.pid_yaw.go_yaw(goal,sen_data["x"])
-            self.motor.spinturn(20)
+            self.motor.spinturn(30)
             #print("sen:"+str(sen_data["x"]))
             #print("goal:"+str(goal))
 
@@ -107,6 +116,7 @@ class OF:
     # 水に潜った状態で前に進む関数
     # 引数 rotate:どのくらい進むかself.rotate(辞書型)のkeyの値 yaw:機体に向き(pidの向き) sen_data:センサの値(辞書型) 
     def diving_advance(self,rotate,yaw,sen_data):
+        pid_yaw = PID_yaw()
         # 潜水して進む前のモータ回転数を記録(合計値)
         rot_ini = 0
         for i in range(4):
@@ -118,6 +128,9 @@ class OF:
             # 現在のモータ回転数を記録
             for i in range(4):
                 rot += sen_data["rot"+str(i)]
+
+            print("rot : "+str(rot))
+            print("\n\n")
 
             # モータ回転数が規定値を超えていれば終了
             if(rot - rot_ini) >= rotate:
@@ -135,8 +148,16 @@ class OF:
             self.motor.up_down(MV)
 
             # 方向pid
-            MV = self.pid_yaw.go_yaw(yaw,sen_data["x"])
-            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed,self.speed)
+            MV = pid_yaw.go_yaw(yaw,sen_data["x"])
+            #MV = 0
+            if(abs(sen_data["x"]-yaw) < 5):
+                MV = 0
+            
+            #print("\tpid goal : "+str(yaw))
+            #print("\tpid sen : "+str(sen_data["x"]))
+            #print("\tpid mv : "+str(MV))
+            #print("\n\n")
+            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
 
     # 浮上する関数
     # 引数 sen_data:センサの値(辞書型)
@@ -151,7 +172,7 @@ class OF:
 
             # 深さpid
             MV = self.pid_depth.go_depth(self.initial_depth,sen_data["depth"])
-            self.motor.up_down(0)
+            self.motor.up_down(-20)
             #print(-MV)
 
     # 浮上後設定した浮上位置か比較し、再潜水を行う関数
@@ -188,6 +209,7 @@ class OF:
     # 引数 gola:目的の回転回数 sen_data:センサ値(辞書型)
     def rotate_advance(self,rotate,x,sen_data):
         rot_ini = 0
+        pid_yaw = PID_yaw()
         for i in range(4):
             rot_ini += sen_data["rot"+str(i)]
 
@@ -200,8 +222,136 @@ class OF:
                 self.motor.stop_go_back()
                 break
 
-            MV = self.pid_yaw.go_yaw(x,sen_data["x"])
-            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed,self.speed)
+            MV = pid_yaw.go_yaw(x,sen_data["x"])
+            #MV = 0
+            if(abs(sen_data["x"]-x) < 5):
+                MV = 0
+            print("\t\tmy_op : "+str(sen_data["endtime"]))
+            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
+
+    def diving2(self,goal,sen_data):
+        # 潜る前の圧力センサの値を保持(浮上時に使用)
+        self.initial_depth = sen_data["depth"]
+        self.goal = goal
+        while(True):
+            # datasheetの分解能から記入したい(0.2)
+            # ゴールとの誤差が0.2なら深さ調節終了
+            if(abs(self.goal-sen_data["depth"]) < 0.2):
+                # 潜水後も潜り続けてほしいためモータはとめない
+                break
+            if(sen_data["depth"] > self.goal):
+                break
+
+            # 深さpid
+            MV = self.pid_depth.go_depth(self.goal,sen_data["depth"])
+            self.motor.up_down(MV)
+            #print(MV)
+            
+    # 水に潜った状態で前に進む関数
+    # 引数 rotate:どのくらい進むかself.rotate(辞書型)のkeyの値 yaw:機体に向き(pidの向き) sen_data:センサの値(辞書型) 
+    def diving_advance2(self,rotate,yaw,sen_data,cap_flag):
+        pid_yaw = PID_yaw()
+        # 潜水して進む前のモータ回転数を記録(合計値)
+        rot_ini = 0
+        for i in range(4):
+            rot_ini += sen_data["rot"+str(i)]
+        
+        # モータが一定回転したら終了
+        while(True):
+            #ブイを捉えたら終了
+            if cap_flag.value == 1:
+                break
+
+            rot = 0
+            # 現在のモータ回転数を記録
+            for i in range(4):
+                rot += sen_data["rot"+str(i)]
+
+            # モータ回転数が規定値を超えていれば終了
+            if(rot - rot_ini) >= rotate:
+                # 潜水して進み終えたら浮上するから潜っているモータと前進しているモータストップ
+                # 機体は浮力で自然に浮かぶため浮上の手助けのため止めている
+                self.motor.stop()
+                break
+
+            # 深さpid
+            MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
+
+            if(sen_data["depth"] > self.depth):
+                MV = 0
+
+            self.motor.up_down(MV)
+
+            # 方向pid
+            MV = pid_yaw.go_yaw(yaw,sen_data["x"])
+            #MV = 0
+            if(abs(sen_data["x"]-yaw) < 5):
+                MV = 0
+            
+            #print("\tpid goal : "+str(yaw))
+            #print("\tpid sen : "+str(sen_data["x"]))
+            #print("\tpid mv : "+str(MV))
+            #print("\n\n")
+            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
+
+    #カメラの映像から制御する
+    #ブイの面積が一定以上の値になったら終了
+    #ブイのX軸Y軸を見て方向を制御する
+    #X → 0 ~ 650
+    #Y → 0 ~ 475
+    def camera_advance(self,sen_data,X,Y,S):
+        cap_depth = 0
+        while(True):
+
+            #bui tikai END
+            if S.value > 100000:
+                break
+
+            #X軸制御　左にブイがある時
+            if X.value < 0:
+                self.motor.go_back_each(self.speed,self.speed+10,self.speed,self.speed)
+            elif X.value >= 0 and X.value < 65:
+                self.motor.go_back_each(self.speed,self.speed+8,self.speed,self.speed)
+            elif X.value >= 65 and X.value < 130:
+                self.motor.go_back_each(self.speed,self.speed+6,self.speed,self.speed)
+            elif X.value >= 130 and X.value < 195:
+                self.motor.go_back_each(self.speed,self.speed+4,self.speed,self.speed)
+            elif X.value >= 195 and X.value < 260:
+                self.motor.go_back_each(self.speed,self.speed+2,self.speed,self.speed)
+            elif X.value >= 260 and X.value < 300:
+                self.motor.go_back_each(self.speed,self.speed+1,self.speed,self.speed)             
+            #ブイが画面の真ん中
+            elif X.value >= 300 and X.value < 350:
+                self.motor.go_back_each(self.speed+1,self.speed,self.speed,self.speed)    
+            #X軸制御　右にブイがある時
+            elif X.value >= 350 and X.value < 390:
+                self.motor.go_back_each(self.speed+1,self.speed,self.speed,self.speed)
+            elif X.value >= 390 and X.value < 455:
+                self.motor.go_back_each(self.speed+2,self.speed,self.speed,self.speed)
+            elif X.value >= 455 and X.value < 520:
+                self.motor.go_back_each(self.speed+4,self.speed,self.speed,self.speed)
+            elif X.value >= 520 and X.value < 585:
+                self.motor.go_back_each(self.speed+6,self.speed,self.speed,self.speed)
+            elif X.value >= 585 and X.value < 650:
+                self.motor.go_back_each(self.speed+8,self.speed,self.speed,self.speed)
+            elif X.value >= 585 and X.value >= 650:
+                self.motor.go_back_each(self.speed+10,self.speed,self.speed,self.speed)
+            #例外
+            else:
+                self.motor.go_back_each(self.speed,self.speed,self.speed,self.speed)
+            
+            if Y.value >= 30:
+                cap_depth += 0.02
+                print(cap_depth)
+                # 深さpid
+                MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
+                MV = MV + cap_depth
+                self.motor.up_down(MV)
+
+            # 深さpid
+            MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
+            MV = MV + cap_depth
+            self.motor.up_down(MV)
 
 
 if __name__ == "__main__":

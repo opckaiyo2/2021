@@ -28,19 +28,19 @@ class Motor:
         # 新規追加は後ろ側[b]のやつ
         self.xrf_pwm = 7
         self.xrf_dir = 13
-        self.xrf_cor = 0.96
+        self.xrf_cor = 0.88
         # ---------------
         self.xrb_pwm = 8
         self.xrb_dir = 4
-        self.xrb_cor = 0.95
+        self.xrb_cor = 0.88
         # ---------------
         self.xlf_pwm = 12
         self.xlf_dir = 6
-        self.xlf_cor = 0.99
+        self.xlf_cor = 0.97
         # ---------------
         self.xlb_pwm = 11
         self.xlb_dir = 15
-        self.xlb_cor = 0.80
+        self.xlb_cor = 0.97
         # ---------------
         self.yr_pwm = 9
         self.yr_dir = 14
@@ -115,11 +115,11 @@ class Motor:
     # 上昇_下降(up_down)  新機体は反転
     def up_down(self, val):
         self.yl(-val)
-        self.yr(val)
+        self.yr(-val)
 
     # 上昇_下降(それぞれの出力を指定)
     def up_down_each(self, l, r):
-        self.yl(l)
+        self.yl(-l)
         self.yr(-r)
 
     # 右回り_左回り(spinturn)
