@@ -1,9 +1,15 @@
 #coding: utf-8
+# 自作関数読み込みのためのライブラリ
 import sys
+# Arduinoのsensordataを変換するためのライブラリ
 import ast
+# コンフィグファイル使用のライブラリ
 import configparser
+# gpsの位置計算用ライブラリ
 from pyproj import Geod
+# マルチプロセスのためのライブラリ
 from multiprocessing import Process, Manager, Value
+# 主に時間計測やwait処理などで必要なライブラリ
 import time
 
 # 自作関数の場所をsystempathに追加
@@ -19,38 +25,53 @@ from my_gps import get_gps
 
 
 class OF:
+    # この関数はOFクラスがインスタンス化を行う時に必ず最初に呼び出される特殊な関数
     def __init__(self):
         # 設定ファイル読み込み-------------------------------------------
+
+        # コンフィグファイルの場所
         INI_FILE = "/home/pi/2021/main/config/config.ini"
+        # クラスをインスタンス化
         inifile = configparser.ConfigParser()
+        #  コンフィグファイルの場所 文字コードを指定しコンフィグ読み込み
         inifile.read(INI_FILE,encoding="utf-8")
 
+        # gpsのwaypoint(潜水位置など)をコンフィグファイルから読み込み
         gps_initial = ast.literal_eval(inifile.get("operation", "gps_initial"))
         gps_diving = ast.literal_eval(inifile.get("operation", "gps_diving"))
         gps_ascend = ast.literal_eval(inifile.get("operation", "gps_ascend"))
         gps_test = ast.literal_eval(inifile.get("operation", "gps_test"))
         
+        # 機体のスピードを調整するduty比(電流値の関係で55がMAX電気科と要相談)
         self.speed = inifile.getfloat("operation", "defalut_speed")
+        # 機体の潜る深さを設定する
         self.depth = inifile.getfloat("operation", "depth")
 
+        # 機体を自動で動かす場合海上ではGPSを使用するが海中ではモータの回転数をで制御する
+        # その際に使用するモータ回転数読み込み辞書型化する
         self.rotate = {"ava_rot":inifile.getint("autonomy","ava_rot"),
                     "re_rot":inifile.getint("autonomy","re_rot")}
 
+        # 読み込んだwaypointを辞書型化する
         self.gps_maker = {"initial":gps_initial,
                     "diving":gps_diving,
                     "ascend":gps_ascend,
                     "test":gps_test}
+
         # 設定ファイル読み込み-------------------------------------------
 
-        #self.pid_yaw = PID_yaw()
+        # 深さをPIdで制御するためのクラスをインスタンス化
         self.pid_depth = PID_depth()
+        # モータを制御するためのクラスをインスタンス化
         self.motor = Motor()
 
     # コンフィグファイルで設定した初期・潜水・浮上位置に向かう関数
     # 引数 maker:どの位置に向かうかself.gps_maker(辞書型)のkeyの値 sen_data:センサの値(辞書型)
+    # この関数は時間がなかったため動作未確認です。
     def gps_position(self,maker,sen_data):
+        # 設定した目的地に到達するまで無限ループ
         while(True):
-            # gpsとconfig.iniの初期位置比較
+            # 現在のgps値とconfig.iniの初期位置比較
             gps = self.waypoint(sen_data["lat"],sen_data["lon"],
                         self.gps_maker[maker]["lat"], self.gps_maker[maker]["lon"])
             
@@ -71,61 +92,64 @@ class OF:
     # 機体の向きを変える関数
     # 引数 goal:向きたい角度 sen_data:センサの値(辞書型)
     def rotate_yaw(self,goal,sen_data):
-        if sen_data["x"] < 190:
-            goal = sen_data["x"] + 190
-        else:
-            goal = sen_data["x"] - 190
-
-        self.goal = goal
-        print("start : "+str(sen_data["x"]))
-        print("goal : "+str(self.goal))
-        print("\n\n")
+        # 方位pIdのクラスをインスタンス化
+        pid_yaw = PID_yaw()
+        print("Uターン開始方位 : "+str(sen_data["x"]))
+        print("Uターン終了予定方位 : "+str(goal))
+        print("\n")
         while(True):
+            # 現在の機体向きを表示
+            print("\r現在方位 : "+str(sen_data["x"],end=""))
             # ゴールと誤差が5°以内なら終了
-            if(abs(self.goal-sen_data["x"]) < 20):
+            if(abs(goal-sen_data["x"]) < 20):
                 # 角度調節した後はモータが止まってほしいためself.motor.stop()
                 self.motor.stop()
+                # 見やすさ改善改行
+                print("\n\n")
                 break
 
-            # 方位角とオイラー角を合わせないといけない?
-            # pidで角度調整
-            #MV = self.pid_yaw.go_yaw(goal,sen_data["x"])
+            # pidで角度調整(現在は不具合が出たためコメントアウト中)
+            #MV = pid_yaw.go_yaw(goal,sen_data["x"])
             self.motor.spinturn(30)
-            #print("sen:"+str(sen_data["x"]))
-            #print("goal:"+str(goal))
 
     # コンフィグファイルで設定した深さに機体を潜らせる関数
     # 引数 sen_data:センサの値(辞書型)
     def diving(self,sen_data):
+        print("潜水開始深さ : "+str(sen_data["depth"]))
+        print("潜水終了深さ : "+str(self.depth))
+        print("\n")
         # 潜る前の圧力センサの値を保持(浮上時に使用)
         self.initial_depth = sen_data["depth"]
         while(True):
+            # 現在の機体の深さを表示
+            print("\r深さ : "+str(sen_data["depth"],end=""))
             # datasheetの分解能から記入したい(0.2)
             # ゴールとの誤差が0.2なら深さ調節終了
             if(abs(self.depth-sen_data["depth"]) < 0.2):
+                # 見やすさ改善改行
+                print("\n\n")
                 # 潜水後も潜り続けてほしいためモータはとめない
-                break
-            if(sen_data["depth"] > self.depth):
                 break
 
             # 深さpid
             MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
             self.motor.up_down(MV)
-            #print(MV)
 
     # 水に潜った状態で前に進む関数
     # 引数 rotate:どのくらい進むかself.rotate(辞書型)のkeyの値 yaw:機体に向き(pidの向き) sen_data:センサの値(辞書型) 
     def diving_advance(self,rotate,yaw,sen_data):
+        # 方位pIdのクラスをインスタンス化
         pid_yaw = PID_yaw()
+
         # 潜水して進む前のモータ回転数を記録(合計値)
         rot_ini = 0
         for i in range(4):
             rot_ini += sen_data["rot"+str(i)]
         
-        # モータが一定回転したら終了
+        # モータが一定回転するまで無限ループ
         while(True):
-            rot = 0
             # 現在のモータ回転数を記録
+            rot = 0
             for i in range(4):
                 rot += sen_data["rot"+str(i)]
 
@@ -133,6 +157,8 @@ class OF:
 
             # モータ回転数が規定値を超えていれば終了
             if(rot - rot_ini) >= rotate:
+                # 見やすさ改善改行
+                print("\n\n")
                 # 潜水して進み終えたら浮上するから潜っているモータと前進しているモータストップ
                 # 機体は浮力で自然に浮かぶため浮上の手助けのため止めている
                 self.motor.stop()
@@ -141,29 +167,33 @@ class OF:
             # 深さpid
             MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
 
+            # pid暴走した際のセーフティ
             if(sen_data["depth"] > self.depth):
                 MV = 0
 
+            # 深さpidの値をモータ反映
             self.motor.up_down(MV)
 
             # 方向pid
             MV = pid_yaw.go_yaw(yaw,sen_data["x"])
-            #MV = 0
             if(abs(sen_data["x"]-yaw) < 5):
                 MV = 0
             
-            #print("\tpid goal : "+str(yaw))
-            #print("\tpid sen : "+str(sen_data["x"]))
-            #print("\tpid mv : "+str(MV))
-            #print("\n\n")
+            # 方向pidの値をモータ反映
             self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
 
     # 浮上する関数
     # 引数 sen_data:センサの値(辞書型)
     def ascend(self,sen_data):
+        print("浮上開始深さ : "+str(sen_data["depth"]))
+        print("浮上終了深さ : "+str(self.initial_depth))
+        print("\n")
+        # 目的の深さになるまで無限ループ
         while(True):
             # 目標の深さになったら終了
             if(abs(self.initial_depth-sen_data["depth"]) < 0.2):
+                # 見やすさ改善改行
+                print("\n\n")
                 # 浮上あとは機体は浮くようになっているためモータストップ
                 self.motor.stop_up_down()
                 time.sleep(1)
@@ -172,10 +202,10 @@ class OF:
             # 深さpid
             MV = self.pid_depth.go_depth(self.initial_depth,sen_data["depth"])
             self.motor.up_down(-20)
-            #print(-MV)
 
     # 浮上後設定した浮上位置か比較し、再潜水を行う関数
     # 引数 maker:浮上位置の設定self.gps_maker(辞書型)のkeyの値 yaw:機体の向き(pidの向き) sen_data:センサの値(辞書型)
+    # この関数は時間がなかったため動作未確認です。
     def re_diving(self,maker,yaw,sen_data):
         while(True):
             # wapoint関数で距離、方位角、逆方位角もとめる(距離と角度)
@@ -197,6 +227,7 @@ class OF:
 
     # gpsと現在地の緯度、経度から距離、方位角、逆方位角を求める
     # 引数 g_lat:目的地緯度 g_lon:目的地経度 sen_data:センサの値(辞書型)
+    # この関数は時間がなかったため動作未確認です。
     def waypoint(self,s_lat,s_lon,g_lat,g_lon):
         g = Geod(ellps='WGS84')
         azimuth, back_azimuth, distance_2d = g.inv(s_lat,s_lon, g_lat, g_lon)
@@ -207,26 +238,37 @@ class OF:
     # 深さを調節するモータはpidで回すので前進後進モータだけ止める
     # 引数 gola:目的の回転回数 sen_data:センサ値(辞書型)
     def rotate_advance(self,rotate,x,sen_data):
-        rot_ini = 0
+        # 方位pIdのクラスをインスタンス化
         pid_yaw = PID_yaw()
+        
+        # 前進する前のモータ回転数を記録(合計値)
+        rot_ini = 0
         for i in range(4):
             rot_ini += sen_data["rot"+str(i)]
 
+        # モータが一定回転するまで無限ループ
         while(True):
+            # 現在のモータ回転数を記録
             rot = 0
             for i in range(4):
                 rot += sen_data["rot"+str(i)]
 
+            print("\rrotate : "+str(rot-rot_ini),end="")
+
+            # モータ回転数が規定値を超えていれば終了
             if (rot - rot_ini) >= rotate:
+                # 見やすさ改善改行
+                print("\n\n")
+                # 海上で進んだあとは潜る事が多いので前進モータだけ止める
                 self.motor.stop_go_back()
                 break
 
-            print("\rrotate : "+str(rot-rot_ini),end="")
-
+            # 方向pid
             MV = pid_yaw.go_yaw(x,sen_data["x"])
-            #MV = 0
             if(abs(sen_data["x"]-x) < 5):
                 MV = 0
+            
+            # 方向pidの値をモータ反映
             self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
 
     def diving2(self,goal,sen_data):
@@ -246,7 +288,7 @@ class OF:
             MV = self.pid_depth.go_depth(self.goal,sen_data["depth"])
             self.motor.up_down(MV)
             #print(MV)
-            
+    
     # 水に潜った状態で前に進む関数
     # 引数 rotate:どのくらい進むかself.rotate(辞書型)のkeyの値 yaw:機体に向き(pidの向き) sen_data:センサの値(辞書型) 
     def diving_advance2(self,rotate,yaw,sen_data,cap_flag):
@@ -353,7 +395,7 @@ class OF:
             MV = MV + cap_depth
             self.motor.up_down(MV)
 
-
+# ここはこのファイルを単体で実行するとここからプログラムがスタートする。
 if __name__ == "__main__":
     of = OF()
     motor = Motor()

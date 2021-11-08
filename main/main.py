@@ -66,7 +66,7 @@ def main():
         Y = Value('i',0)
         S = Value('i',0)
 
-        # 各プロセスオブジェクト作成
+        # 各プロセスのインスタンス作成
         # ardからデータ取得
         ard_process = Process(target=get_sen, daemon=True, args=(sen_data,))
         # gpsからデータ取得
@@ -117,6 +117,21 @@ def main():
         except KeyboardInterrupt:
             # キーボードエラー(Ctrl+Cなどでプログラムを終了させた)時モータストップ
             motor.stop()
+
+        # マグネットスイッチ抜けた後自動で止まるテスト
+        #"""
+        except IOError:
+            try:
+                while(True):
+                    motor.stop()
+                    break
+            except IOError:
+                pass
+
+            except Exception as e:
+                pass
+        #"""
+
         except Exception as e:
             # その他すべてのエラー時モータストップ
             motor.stop()
@@ -129,8 +144,6 @@ def main():
             # 見やすさ改善改行
             print("\n")
 
-
-
-
+# ここはこのファイルを単体で実行するとここからプログラムがスタートする。
 if __name__ == "__main__":
     main()
