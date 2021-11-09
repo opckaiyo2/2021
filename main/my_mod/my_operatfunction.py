@@ -92,20 +92,19 @@ class OF:
     # 機体の向きを変える関数
     # 引数 goal:向きたい角度 sen_data:センサの値(辞書型)
     def rotate_yaw(self,goal,sen_data):
+        print("Uターン開始方位\t\t"+str(sen_data["x"]))
+        print("Uターン終了予定方位\t"+str(goal))
         # 方位pIdのクラスをインスタンス化
         pid_yaw = PID_yaw()
-        print("Uターン開始方位 : "+str(sen_data["x"]))
-        print("Uターン終了予定方位 : "+str(goal))
-        print("\n")
         while(True):
             # 現在の機体向きを表示
-            print("\r現在方位 : "+str(sen_data["x"],end=""))
+            print("\r現在方位\t\t"+str(sen_data["x"]),end="")
             # ゴールと誤差が5°以内なら終了
             if(abs(goal-sen_data["x"]) < 20):
                 # 角度調節した後はモータが止まってほしいためself.motor.stop()
                 self.motor.stop()
                 # 見やすさ改善改行
-                print("\n\n")
+                print("\n")
                 break
 
             # pidで角度調整(現在は不具合が出たためコメントアウト中)
@@ -115,19 +114,18 @@ class OF:
     # コンフィグファイルで設定した深さに機体を潜らせる関数
     # 引数 sen_data:センサの値(辞書型)
     def diving(self,sen_data):
-        print("潜水開始深さ : "+str(sen_data["depth"]))
-        print("潜水終了深さ : "+str(self.depth))
-        print("\n")
+        print("潜水開始深さ\t"+str(sen_data["depth"]))
+        print("潜水終了深さ\t"+str(self.depth))
         # 潜る前の圧力センサの値を保持(浮上時に使用)
         self.initial_depth = sen_data["depth"]
         while(True):
             # 現在の機体の深さを表示
-            print("\r深さ : "+str(sen_data["depth"],end=""))
+            print("\r深さ\t\t"+str(sen_data["depth"]),end="")
             # datasheetの分解能から記入したい(0.2)
             # ゴールとの誤差が0.2なら深さ調節終了
             if(abs(self.depth-sen_data["depth"]) < 0.2):
                 # 見やすさ改善改行
-                print("\n\n")
+                print("\n")
                 # 潜水後も潜り続けてほしいためモータはとめない
                 break
 
@@ -138,6 +136,7 @@ class OF:
     # 水に潜った状態で前に進む関数
     # 引数 rotate:どのくらい進むかself.rotate(辞書型)のkeyの値 yaw:機体に向き(pidの向き) sen_data:センサの値(辞書型) 
     def diving_advance(self,rotate,yaw,sen_data):
+        print("目標回転数\t"+str(rotate))
         # 方位pIdのクラスをインスタンス化
         pid_yaw = PID_yaw()
 
@@ -153,12 +152,12 @@ class OF:
             for i in range(4):
                 rot += sen_data["rot"+str(i)]
 
-            print("\rrotate : "+str(rot-rot_ini),end="")
+            print("\r回転数\t\t"+str(rot-rot_ini),end="")
 
             # モータ回転数が規定値を超えていれば終了
             if(rot - rot_ini) >= rotate:
                 # 見やすさ改善改行
-                print("\n\n")
+                print("\n")
                 # 潜水して進み終えたら浮上するから潜っているモータと前進しているモータストップ
                 # 機体は浮力で自然に浮かぶため浮上の手助けのため止めている
                 self.motor.stop()
@@ -185,15 +184,14 @@ class OF:
     # 浮上する関数
     # 引数 sen_data:センサの値(辞書型)
     def ascend(self,sen_data):
-        print("浮上開始深さ : "+str(sen_data["depth"]))
-        print("浮上終了深さ : "+str(self.initial_depth))
-        print("\n")
+        print("浮上開始深さ\t"+str(sen_data["depth"]))
+        print("浮上終了深さ\t"+str(self.initial_depth))
         # 目的の深さになるまで無限ループ
         while(True):
             # 目標の深さになったら終了
             if(abs(self.initial_depth-sen_data["depth"]) < 0.2):
                 # 見やすさ改善改行
-                print("\n\n")
+                print("\n")
                 # 浮上あとは機体は浮くようになっているためモータストップ
                 self.motor.stop_up_down()
                 time.sleep(1)
@@ -238,6 +236,7 @@ class OF:
     # 深さを調節するモータはpidで回すので前進後進モータだけ止める
     # 引数 gola:目的の回転回数 sen_data:センサ値(辞書型)
     def rotate_advance(self,rotate,x,sen_data):
+        print("目標回転数\t"+str(rotate))
         # 方位pIdのクラスをインスタンス化
         pid_yaw = PID_yaw()
         
@@ -253,12 +252,12 @@ class OF:
             for i in range(4):
                 rot += sen_data["rot"+str(i)]
 
-            print("\rrotate : "+str(rot-rot_ini),end="")
+            print("\r回転数\t\t"+str(rot-rot_ini),end="")
 
             # モータ回転数が規定値を超えていれば終了
             if (rot - rot_ini) >= rotate:
                 # 見やすさ改善改行
-                print("\n\n")
+                print("\n")
                 # 海上で進んだあとは潜る事が多いので前進モータだけ止める
                 self.motor.stop_go_back()
                 break
@@ -394,6 +393,23 @@ class OF:
             MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
             MV = MV + cap_depth
             self.motor.up_down(MV)
+
+    def Manual_advance(self,sen_data):
+        # 前進する前のモータ回転数を記録(合計値)
+        rot_ini = 0
+        for i in range(4):
+            rot_ini += sen_data["rot"+str(i)]
+
+        # モータが一定回転するまで無限ループ
+        while(True):
+            # 現在のモータ回転数を記録
+            rot = 0
+            for i in range(4):
+                rot += sen_data["rot"+str(i)]
+
+            print("\r回転数\t\t"+str(rot-rot_ini),end="")
+
+            self.motor.go_back(self.speed)
 
 # ここはこのファイルを単体で実行するとここからプログラムがスタートする。
 if __name__ == "__main__":

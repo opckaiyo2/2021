@@ -83,13 +83,13 @@ tryについて
 <https://docs.python.org/ja/3/tutorial/errors.html>
 <br><br>
 
-マルチプロセス  
+マルチプロセスについて  
 <https://docs.python.org/ja/3/library/multiprocessing.html>  
 <https://qiita.com/y518gaku/items/db3b0ced6d62b616f961>  
 <https://qiita.com/t_okkan/items/4127a87177ed2b2db148>
 <br><br>
 
-PID  
+PIDについて  
 <https://qiita.com/BIG_LARGE_STONE/items/4f8af62b3edc4a03c4a5>  
 <https://shizenkarasuzon.hatenablog.com/entry/2018/08/27/002812>  
 <https://algorithm.joho.info/seigyoriron/python-control-pid/>  

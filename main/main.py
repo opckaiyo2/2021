@@ -113,24 +113,10 @@ def main():
                 raise ValueError("The operation setting value in config.ini is wrong.")
 
             # どの操作方法で動かすか---------------------------------
-            
+
         except KeyboardInterrupt:
             # キーボードエラー(Ctrl+Cなどでプログラムを終了させた)時モータストップ
             motor.stop()
-
-        # マグネットスイッチ抜けた後自動で止まるテスト
-        #"""
-        except IOError:
-            try:
-                while(True):
-                    motor.stop()
-                    break
-            except IOError:
-                pass
-
-            except Exception as e:
-                pass
-        #"""
 
         except Exception as e:
             # その他すべてのエラー時モータストップ
@@ -143,6 +129,21 @@ def main():
             print("main.py main try error : ",e)
             # 見やすさ改善改行
             print("\n")
+
+        finally:
+            # プログラム終了時　サブプロセスkill
+            # サブプロセスがまだ生きていればkillする
+            if(ard_process.is_alive()):
+                ard_process.kill()
+            
+            if(gps_process.is_alive()):
+                gps_process.kill()
+
+            if(camera_process.is_alive()):
+                camera_process.kill()
+
+            if(log_process.is_alive()):
+                log_process.kill()
 
 # ここはこのファイルを単体で実行するとここからプログラムがスタートする。
 if __name__ == "__main__":
