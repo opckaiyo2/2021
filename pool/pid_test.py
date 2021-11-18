@@ -51,11 +51,10 @@ class PID_yaw:
     #time.sleep(1.0)
 
     #"""
-    print("目標 : " + str(yaw2goal))
-    print("現在 : " + str(yaw_now))
-    print("操作量 : " + str(self.M))
-    print("方向+操作量 : " + str(correct_yaw))
-    print("")
+    print("目標 : " + str(yaw2goal)+"  ")
+    print("現在 : " + str(yaw_now)+"  ")
+    print("操作量 : " + str(self.M)+"  ")
+    print("方向+操作量 : " + str(correct_yaw)+"\033[4A")
     #"""
 
     #print("M : ",self.M)
@@ -134,14 +133,14 @@ if __name__ == '__main__':
   pid = PID_yaw()
 
   while(True):
-    ser = serial.Serial('/dev/ttyACM0', 9600)
+    ser = serial.Serial('/dev/ttyACM0', 115200)
 
     while(True):
       try:
         String_data = ser.readline().decode('utf-8').rstrip()
         dic_date = ast.literal_eval(String_data)
         #print(dic_date)
-        yaw_now = int(dic_date["yaw"])
+        yaw_now = int(dic_date["x"])
         break
 
       except KeyboardInterrupt:
@@ -157,6 +156,7 @@ if __name__ == '__main__':
       pid.fix_yaw(yam2goal,yaw_now,max_correct,correct_yaw)
     
     except KeyboardInterrupt:
+      print("\n\n\n\n")
       motor.stop()
       break
 
