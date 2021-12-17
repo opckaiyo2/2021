@@ -47,6 +47,8 @@ class OF:
         # 機体の潜る深さを設定する
         self.depth = inifile.getfloat("operation", "depth")
 
+        #self.initial_depth = sen_data["depth"]
+
         # 機体を自動で動かす場合海上ではGPSを使用するが海中ではモータの回転数をで制御する
         # その際に使用するモータ回転数読み込み辞書型化する
         self.rotate = {"ava_rot":inifile.getint("autonomy","ava_rot"),
@@ -100,7 +102,7 @@ class OF:
             # 現在の機体向きを表示
             print("\r現在方位\t\t"+str(sen_data["x"]),end="")
             # ゴールと誤差が5°以内なら終了
-            if(abs(goal-sen_data["x"]) < 20):
+            if(abs(goal-sen_data["x"]) < 30):
                 # 角度調節した後はモータが止まってほしいためself.motor.stop()
                 self.motor.stop()
                 # 見やすさ改善改行

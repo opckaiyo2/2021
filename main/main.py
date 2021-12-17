@@ -27,8 +27,10 @@ from my_Teaching import Teaching
 from my_Autonomy import Autonomy
 # 手動
 from my_Manual import Manual
-#潜水テスト
-from my_Test import Tinou
+# 知能計測
+from my_Tinou import Tinou
+# テスト用
+from my_Test import Test
 
 # 設定ファイル読み込み-------------------------------------------
 
@@ -108,6 +110,8 @@ def main():
             elif(operation == 4):
                 # 2021/my_mod/my_Test.pyの関数Tinouを呼び出す。sen_data(センサデータ)などを渡す。
                 Tinou(sen_data,cap_flag,X,Y,S)
+            elif(operation == 5):
+                Test(sen_data)
             else:
                 #例外発生分except Exception as eでエラーが検出される
                 raise ValueError("The operation setting value in config.ini is wrong.")
@@ -147,4 +151,7 @@ def main():
 
 # ここはこのファイルを単体で実行するとここからプログラムがスタートする。
 if __name__ == "__main__":
+    print("プログラムが実行されました。")
+    print("センサ値が安定するまで待機します。")
+    print("\n\n")
     main()

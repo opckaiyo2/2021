@@ -1,10 +1,22 @@
 #coding: utf-8
 import datetime
 import ast
+import os
 
 def log_txt(ard_data):
+    # logフォルダpath
+    folder = "/home/pi/2021/main/log/"
+
+    # logのフォルダ内のフォルダ名取得
+    folders = os.listdir(folder)
+
+    # 今日の日付フォルダがあるか確認なければ作成
+    today = folder + str(datetime.datetime.now().strftime("%Y-%m-%d"))
+    if not (str(datetime.datetime.now().strftime("%Y-%m-%d")) in folders):
+        os.mkdir(today)
+
     # log作成時刻がファイル名のファイル作成
-    filiname = "/home/pi/2021/main/log/" + str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".txt") 
+    filiname = today + "/" + str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S") + ".txt") 
     # 同じデータを書き込まないように前ループのデータ保管用変数
     old_ard_data = ""
     
