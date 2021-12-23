@@ -1,6 +1,19 @@
 #coding: utf-8
 #! /usr/bin/env python3
 
+"""
+クラスはPCA9685というPWMを発生させる基盤をI2C通信を用いて操作している。
+PAC9685はモータドライバに接続されている。
+PCA9685を用いてモータの強さを制御するPWM波形と
+モータの回転向きを決める0 or 1の信号を出力している。
+
+モータの回転向きを決める0 or 1の信号はArduinoかraspiから出力すると
+PCA9685のピンを削減できる
+またArduinoは現在8個のPWMを出せるがPWMピンを他で使用しているため
+この基盤を使用している
+Arduinoのピン配列を変える必要があるためPCA9685の使用を継続している。
+"""
+
 import time
 import Adafruit_PCA9685
 import sys
