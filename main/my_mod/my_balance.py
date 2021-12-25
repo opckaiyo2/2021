@@ -34,10 +34,10 @@ class PID_yaw:
         self.Kp = float(yaw_pid.get('Kp'))
         self.Ki = float(yaw_pid.get('Ki'))
         self.Kd = float(yaw_pid.get('Kd'))
-    def go_yaw(self, goal, data):
+    def go_yaw(self, goal, sen_data):
 
         # センサから得た現在の方向
-        now_yaw = data
+        now_yaw = sen_data["x"]
 
         # 計算ように-180~180だったデータを0-359に 現在の方向
         if now_yaw < 0:
@@ -71,6 +71,11 @@ class PID_yaw:
 
         # 制御量と制御方向を決定
         MV = self.M * direction
+
+        sen_data["x_dev"] = self.e
+        sen_data["x_mov"] = self.M
+        sen_data["x_dir"] = direction
+
         return MV
 
     #左周りが近いなら-1右周りなら1を返す
@@ -115,13 +120,13 @@ class PID_depth:
         self.Ki = float(depth_pid.get('Ki'))
         self.Kd = float(depth_pid.get('Kd'))
 
-    def go_depth(self, goal, data):
+    def go_depth(self, goal, sen_data):
         # 初期値
-        depth_zero = data
+        depth_zero = sen_data["depth"]
 
-        now_depth = self.map_depth((data - depth_zero))
+        now_depth = self.map_depth((sen_data["depth"] - depth_zero))
         # print(now_depth)
-        # print("barance2:",data["depth"] - depth_zero)
+        # print("barance2:",sen_data["depth"] - depth_zero)
 
         self.M1 = self.M
         self.e1 = self.e
@@ -137,6 +142,10 @@ class PID_depth:
             self.M = 0
 
         MV = self.M
+
+        sen_data["d_dev"] = now_depth
+        sen_data["d_mov"] = self.M
+
         return MV
 
     # 圧力センサーの値を(0 ~ 100)に変換

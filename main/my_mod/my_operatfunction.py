@@ -88,7 +88,7 @@ class OF:
 
             # 直進 進む強さは電流計の値を見て調整できるようにしたい
             # pidしながら直進
-            MV = self.pid_yaw.go_yaw(gps["azimuth"],sen_data["x"])
+            MV = self.pid_yaw.go_yaw(gps["azimuth"],sen_data)
             self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
 
     # 機体の向きを変える関数
@@ -110,7 +110,7 @@ class OF:
                 break
 
             # pidで角度調整(現在は不具合が出たためコメントアウト中)
-            #MV = pid_yaw.go_yaw(goal,sen_data["x"])
+            #MV = pid_yaw.go_yaw(goal,sen_data)
             self.motor.spinturn(30)
 
     # コンフィグファイルで設定した深さに機体を潜らせる関数
@@ -176,7 +176,7 @@ class OF:
             self.motor.up_down(MV)
 
             # 方向pid
-            MV = pid_yaw.go_yaw(yaw,sen_data["x"])
+            MV = pid_yaw.go_yaw(yaw,sen_data)
             if(abs(sen_data["x"]-yaw) < 5):
                 MV = 0
             
@@ -265,7 +265,7 @@ class OF:
                 break
 
             # 方向pid
-            MV = pid_yaw.go_yaw(x,sen_data["x"])
+            MV = pid_yaw.go_yaw(x,sen_data)
             if(abs(sen_data["x"]-x) < 5):
                 MV = 0
             
@@ -326,7 +326,7 @@ class OF:
             self.motor.up_down(MV)
 
             # 方向pid
-            MV = pid_yaw.go_yaw(yaw,sen_data["x"])
+            MV = pid_yaw.go_yaw(yaw,sen_data)
             #MV = 0
             if(abs(sen_data["x"]-yaw) < 5):
                 MV = 0
