@@ -89,7 +89,7 @@ class OF:
             # 直進 進む強さは電流計の値を見て調整できるようにしたい
             # pidしながら直進
             MV = self.pid_yaw.go_yaw(gps["azimuth"],sen_data)
-            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
+            self.motor.go_back_each(self.speed+MV,self.speed-MV,self.speed+MV,self.speed-MV)
 
     # 機体の向きを変える関数
     # 引数 goal:向きたい角度 sen_data:センサの値(辞書型)
@@ -181,7 +181,7 @@ class OF:
                 MV = 0
             
             # 方向pidの値をモータ反映
-            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
+            self.motor.go_back_each(self.speed+MV,self.speed-MV,self.speed+MV,self.speed-MV)
 
     # 浮上する関数
     # 引数 sen_data:センサの値(辞書型)
@@ -268,11 +268,11 @@ class OF:
             MV = pid_yaw.go_yaw(x,sen_data)
             
             # 方向pidの値をモータ反映
-            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
+            self.motor.go_back_each(self.speed+MV,self.speed-MV,self.speed+MV,self.speed-MV)
 
-            print("回転数\t\t"+str(rot-rot_ini))
-            print("現在方位\t"+str(sen_data["x"]))
-            print("修正量\t\t"+str(MV))
+            print("回転数\t\t"+str(rot-rot_ini)+"\t\t")
+            print("現在方位\t"+str(sen_data["x"])+"\t\t")
+            print("修正量\t\t"+str(MV)+"\t\t")
             print("\033[4A")
 
     def diving2(self,goal,sen_data):
@@ -338,7 +338,7 @@ class OF:
             #print("\tpid sen : "+str(sen_data["x"]))
             #print("\tpid mv : "+str(MV))
             #print("\n\n")
-            self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
+            self.motor.go_back_each(self.speed+MV,self.speed-MV,self.speed+MV,self.speed-MV)
 
     #カメラの映像から制御する
     #ブイの面積が一定以上の値になったら終了

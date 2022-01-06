@@ -52,49 +52,24 @@ class PID_yaw:
         self.e1 = self.e
         self.e2 = self.e1
 
-        # 目標と現在の差を180未満にする処理(右回り左回りに関係する)
-        if abs(goal - now_yaw) > 180:
-            self.e = 360 - abs(goal - now_yaw)
-        else:
-            self.e = abs(goal - now_yaw)
+        # 目標と現在の差を計算する。
+        self.e = goal - now_yaw
 
         # pid制御量決定
         self.M = self.M1 + self.Kp * (self.e-self.e1) + self.Ki * self.e + self.Kd * ((self.e-self.e1) - (self.e1-self.e2))
-        # 右回り左回り決定
-        direction = self.roteto(now_yaw,goal)
 
         # モータの回転数制限(電流値関係)
         if self.M > 30:
             self.M = 30
-        elif self.M < 0:
-            self.M = 0
-
-        # 制御量と制御方向を決定
-        MV = self.M * direction
+        elif self.M < -30:
+            self.M = -30
 
         sen_data["x_dev"] = self.e
         sen_data["x_mov"] = self.M
-        sen_data["x_dir"] = direction
         sen_data["x_goal"] = goal
         sen_data["x_now_yaw"] = now_yaw
 
-        return MV
-
-    #左周りが近いなら-1右周りなら1を返す
-    def roteto(self,yaw,goal):
-        direction = 0
-        if yaw <= 180:
-            if 0 > yaw - goal > -180:
-                direction = -1
-            else:
-                direction = 1
-        elif yaw <= 360:
-            if 0 < yaw - goal < 180:
-                direction = 1
-            else:
-                direction = -1
-
-        return direction
+        return self.M
 
 #PID制御で角度調整---------------------------------------------------------------
 
