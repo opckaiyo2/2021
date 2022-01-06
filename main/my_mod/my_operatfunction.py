@@ -239,6 +239,7 @@ class OF:
     # 引数 gola:目的の回転回数 sen_data:センサ値(辞書型)
     def rotate_advance(self,rotate,x,sen_data):
         print("目標回転数\t"+str(rotate))
+        print("目標方位\t"+str(x)+"\n")
         # 方位pIdのクラスをインスタンス化
         pid_yaw = PID_yaw()
         
@@ -254,7 +255,6 @@ class OF:
             for i in range(4):
                 rot += sen_data["rot"+str(i)]
 
-            print("\r回転数\t\t"+str(rot-rot_ini),end="")
 
             # モータ回転数が規定値を超えていれば終了
             if (rot - rot_ini) >= rotate:
@@ -266,11 +266,14 @@ class OF:
 
             # 方向pid
             MV = pid_yaw.go_yaw(x,sen_data)
-            if(abs(sen_data["x"]-x) < 5):
-                MV = 0
             
             # 方向pidの値をモータ反映
             self.motor.go_back_each(self.speed-MV,self.speed+MV,self.speed-MV,self.speed+MV)
+
+            print("回転数\t\t"+str(rot-rot_ini))
+            print("現在方位\t"+str(sen_data["x"]))
+            print("修正量\t\t"+str(MV))
+            print("\033[4A")
 
     def diving2(self,goal,sen_data):
         # 潜る前の圧力センサの値を保持(浮上時に使用)

@@ -75,6 +75,8 @@ class PID_yaw:
         sen_data["x_dev"] = self.e
         sen_data["x_mov"] = self.M
         sen_data["x_dir"] = direction
+        sen_data["x_goal"] = goal
+        sen_data["x_now_yaw"] = now_yaw
 
         return MV
 

@@ -135,6 +135,7 @@ def main():
             print("\n")
 
         finally:
+            print("\n\n")
             # プログラム終了時　サブプロセスkill
             # サブプロセスがまだ生きていればkillする
             if(ard_process.is_alive()):
