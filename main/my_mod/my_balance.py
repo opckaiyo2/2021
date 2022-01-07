@@ -34,6 +34,7 @@ class PID_yaw:
         self.Kp = float(yaw_pid.get('Kp'))
         self.Ki = float(yaw_pid.get('Ki'))
         self.Kd = float(yaw_pid.get('Kd'))
+
     def go_yaw(self, goal, sen_data):
 
         # センサから得た現在の方向
@@ -99,69 +100,27 @@ class PID_depth:
 
     def go_depth(self, goal, sen_data):
         # 初期値
-        depth_zero = sen_data["depth"]
-
-        now_depth = self.map_depth((sen_data["depth"] - depth_zero))
-        # print(now_depth)
-        # print("barance2:",sen_data["depth"] - depth_zero)
+        now_depth = sen_data["depth"]
 
         self.M1 = self.M
         self.e1 = self.e
         self.e2 = self.e1
 
-        self.e = self.map_depth(goal) - now_depth
+        self.e = goal - now_depth
 
         self.M = self.M1 + self.Kp * (self.e-self.e1) + self.Ki * self.e + self.Kd * ((self.e-self.e1) - (self.e1-self.e2))
 
         if self.M > 80:
             self.M = 80
-        elif self.M < 0:
-            self.M = 0
+        elif self.M < -80:
+            self.M = -80
 
-        MV = self.M
-
-        sen_data["d_dev"] = now_depth
+        sen_data["d_dev"] = self.e
         sen_data["d_mov"] = self.M
+        sen_data["d_goal"] = goal
+        sen_data["d_now_dep"] = now_depth
 
-        return MV
-
-    # 圧力センサーの値を(0 ~ 100)に変換
-    def map_depth(self, val):
-        """
-        2018年のパラメータ参考になるか分からん
-        # # 海での値(波の上)
-        # # in_min = 0.6
-        # # in_max = 10
-        # # 宜野湾
-        # # in_min = 0.6
-        # # in_max = 7.6
-        # # 小学校プール
-        # in_min = 1.5
-        # in_max = 6
-
-        """
-        # ポリテクプール
-        # in_min = 0.0
-        # in_max = 0.3
-
-        # 海
-        in_min = 0.0
-        in_max = 3.0
-
-        # プールでの値
-        # in_min = 2
-        # in_max = 7
-
-        if val <= in_min: val = in_min
-        if val >= in_max: val = in_max
-
-        in_min = in_min
-        in_max = in_max
-        out_min = 0
-        out_max = 100
-        val = (val - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
-        # print("map",val)
-        return int(val)
+        return self.M
 
 #PID制御で水深調整---------------------------------------------------------------
 

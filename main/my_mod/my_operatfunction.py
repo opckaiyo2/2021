@@ -47,7 +47,8 @@ class OF:
         # 機体の潜る深さを設定する
         self.depth = inifile.getfloat("operation", "depth")
 
-        #self.initial_depth = sen_data["depth"]
+        # デバッグモードのon:offフラグ
+        debug_flag = inifile.getboolean("operation","debug_flag")
 
         # 機体を自動で動かす場合海上ではGPSを使用するが海中ではモータの回転数をで制御する
         # その際に使用するモータ回転数読み込み辞書型化する
@@ -99,8 +100,9 @@ class OF:
         # 方位pIdのクラスをインスタンス化
         pid_yaw = PID_yaw()
         while(True):
-            # 現在の機体向きを表示
-            print("\r現在方位\t\t"+str(sen_data["x"]),end="")
+            if(debug_flag):
+                # 現在の機体向きを表示
+                print("\r現在方位\t\t"+str(sen_data["x"]),end="")
             # ゴールと誤差が5°以内なら終了
             if(abs(goal-sen_data["x"]) < 30):
                 # 角度調節した後はモータが止まってほしいためself.motor.stop()
@@ -121,8 +123,9 @@ class OF:
         # 潜る前の圧力センサの値を保持(浮上時に使用)
         self.initial_depth = sen_data["depth"]
         while(True):
-            # 現在の機体の深さを表示
-            print("\r深さ\t\t"+str(sen_data["depth"]),end="")
+            if(debug_flag):
+                # 現在の機体の深さを表示
+                print("\r深さ\t\t"+str(sen_data["depth"]),end="")
             # datasheetの分解能から記入したい(0.2)
             # ゴールとの誤差が0.2なら深さ調節終了
             if(abs(self.depth-sen_data["depth"]) < 0.2):
@@ -154,7 +157,8 @@ class OF:
             for i in range(4):
                 rot += sen_data["rot"+str(i)]
 
-            print("\r回転数\t\t"+str(rot-rot_ini),end="")
+            if(debug_flag):
+                print("\r回転数\t\t"+str(rot-rot_ini),end="")
 
             # モータ回転数が規定値を超えていれば終了
             if(rot - rot_ini) >= rotate:
@@ -270,10 +274,11 @@ class OF:
             # 方向pidの値をモータ反映
             self.motor.go_back_each(self.speed+MV,self.speed-MV,self.speed+MV,self.speed-MV)
 
-            print("回転数\t\t"+str(rot-rot_ini)+"\t\t")
-            print("現在方位\t"+str(sen_data["x"])+"\t\t")
-            print("修正量\t\t"+str(MV)+"\t\t")
-            print("\033[4A")
+            if(debug_flag):
+                print("回転数\t\t"+str(rot-rot_ini)+"\t\t")
+                print("現在方位\t"+str(sen_data["x"])+"\t\t")
+                print("修正量\t\t"+str(MV)+"\t\t")
+                print("\033[4A")
 
     def diving2(self,goal,sen_data):
         # 潜る前の圧力センサの値を保持(浮上時に使用)
