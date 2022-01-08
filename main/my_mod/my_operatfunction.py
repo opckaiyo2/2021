@@ -142,6 +142,8 @@ class OF:
     # 引数 rotate:どのくらい進むかself.rotate(辞書型)のkeyの値 yaw:機体に向き(pidの向き) sen_data:センサの値(辞書型) 
     def diving_advance(self,rotate,yaw,sen_data):
         print("目標回転数\t"+str(rotate))
+        print("目標方位\t"+str(yaw))
+        print("目標深さ\t"+str(self.depth)+"\n")
         # 方位pIdのクラスをインスタンス化
         pid_yaw = PID_yaw()
 
@@ -170,14 +172,10 @@ class OF:
                 break
 
             # 深さpid
-            MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
-
-            # pid暴走した際のセーフティ
-            if(sen_data["depth"] > self.depth):
-                MV = 0
+            d_MV = self.pid_depth.go_depth(self.depth,sen_data["depth"])
 
             # 深さpidの値をモータ反映
-            self.motor.up_down(MV)
+            self.motor.up_down(d_MV)
 
             # 方向pid
             MV = pid_yaw.go_yaw(yaw,sen_data)
@@ -187,6 +185,14 @@ class OF:
             # 方向pidの値をモータ反映
             self.motor.go_back_each(self.speed+MV,self.speed-MV,self.speed+MV,self.speed-MV)
 
+            if(debug_flag):
+                print("回転数\t\t"+str(rot-rot_ini)+"\t\t")
+                print("現在方位\t"+str(sen_data["x"])+"\t\t")
+                print("修正量\t\t"+str(MV)+"\t\t")
+                print("現在深さ\t"+str(sen_data["depth"])+"\t\t")
+                print("修正量\t\t"+str(d_MV)+"\t\t")
+                print("\033[6A")
+
     # 浮上する関数
     # 引数 sen_data:センサの値(辞書型)
     def ascend(self,sen_data):
@@ -194,6 +200,9 @@ class OF:
         print("浮上終了深さ\t"+str(self.initial_depth))
         # 目的の深さになるまで無限ループ
         while(True):
+            if(debug_flag):
+                # 現在の機体の深さを表示
+                print("\r深さ\t\t"+str(sen_data["depth"]),end="")
             # 目標の深さになったら終了
             if(abs(self.initial_depth-sen_data["depth"]) < 0.2):
                 # 見やすさ改善改行
@@ -205,7 +214,7 @@ class OF:
 
             # 深さpid
             MV = self.pid_depth.go_depth(self.initial_depth,sen_data["depth"])
-            self.motor.up_down(-20)
+            self.motor.up_down(MV)
 
     # 浮上後設定した浮上位置か比較し、再潜水を行う関数
     # 引数 maker:浮上位置の設定self.gps_maker(辞書型)のkeyの値 yaw:機体の向き(pidの向き) sen_data:センサの値(辞書型)
