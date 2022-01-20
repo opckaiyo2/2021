@@ -17,7 +17,7 @@ if __name__ == "__main__":
 
     motor = Motor()
 
-    power = 15
+    power = 5
     print("motor power : ",power)
     
     while True:

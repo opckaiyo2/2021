@@ -48,7 +48,7 @@ class OF:
         self.depth = inifile.getfloat("operation", "depth")
 
         # デバッグモードのon:offフラグ
-        debug_flag = inifile.getboolean("operation","debug_flag")
+        self.debug_flag = inifile.getboolean("operation","debug_flag")
 
         # 機体を自動で動かす場合海上ではGPSを使用するが海中ではモータの回転数をで制御する
         # その際に使用するモータ回転数読み込み辞書型化する
@@ -100,7 +100,7 @@ class OF:
         # 方位pIdのクラスをインスタンス化
         pid_yaw = PID_yaw()
         while(True):
-            if(debug_flag):
+            if(self.debug_flag):
                 # 現在の機体向きを表示
                 print("\r現在方位\t\t"+str(sen_data["x"]),end="")
             # ゴールと誤差が5°以内なら終了
@@ -123,7 +123,7 @@ class OF:
         # 潜る前の圧力センサの値を保持(浮上時に使用)
         self.initial_depth = sen_data["depth"]
         while(True):
-            if(debug_flag):
+            if(self.debug_flag):
                 # 現在の機体の深さを表示
                 print("\r深さ\t\t"+str(sen_data["depth"]),end="")
             # datasheetの分解能から記入したい(0.2)
@@ -159,7 +159,7 @@ class OF:
             for i in range(4):
                 rot += sen_data["rot"+str(i)]
 
-            if(debug_flag):
+            if(self.debug_flag):
                 print("\r回転数\t\t"+str(rot-rot_ini),end="")
 
             # モータ回転数が規定値を超えていれば終了
@@ -185,7 +185,7 @@ class OF:
             # 方向pidの値をモータ反映
             self.motor.go_back_each(self.speed+MV,self.speed-MV,self.speed+MV,self.speed-MV)
 
-            if(debug_flag):
+            if(self.debug_flag):
                 print("回転数\t\t"+str(rot-rot_ini)+"\t\t")
                 print("現在方位\t"+str(sen_data["x"])+"\t\t")
                 print("修正量\t\t"+str(MV)+"\t\t")
@@ -200,7 +200,7 @@ class OF:
         print("浮上終了深さ\t"+str(self.initial_depth))
         # 目的の深さになるまで無限ループ
         while(True):
-            if(debug_flag):
+            if(self.debug_flag):
                 # 現在の機体の深さを表示
                 print("\r深さ\t\t"+str(sen_data["depth"]),end="")
             # 目標の深さになったら終了
@@ -283,7 +283,7 @@ class OF:
             # 方向pidの値をモータ反映
             self.motor.go_back_each(self.speed+MV,self.speed-MV,self.speed+MV,self.speed-MV)
 
-            if(debug_flag):
+            if(self.debug_flag):
                 print("回転数\t\t"+str(rot-rot_ini)+"\t\t")
                 print("現在方位\t"+str(sen_data["x"])+"\t\t")
                 print("修正量\t\t"+str(MV)+"\t\t")

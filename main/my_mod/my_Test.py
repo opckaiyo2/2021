@@ -28,9 +28,9 @@ def Test(sen_data):
     ini_opx = 0
 
     if ini_x < 180:
-        ini_opx = ini_x+150
+        ini_opx = ini_x+180
     elif ini_x > 180:
-        ini_opx = ini_x-150
+        ini_opx = ini_x-180
     else:
         ini_opx = (ini_x+180) % 360
 
