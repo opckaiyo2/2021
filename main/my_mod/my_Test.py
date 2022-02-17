@@ -11,7 +11,7 @@ from my_operatfunction import OF
 
 def Test(sen_data):
 
-    of = OF()
+    of = OF(sen_data)
     motor = Motor()
     
     # データがすべて揃うまでループ endtimeはデータの一番後列
@@ -38,7 +38,8 @@ def Test(sen_data):
     print("Uターン後 PID目標 : " + str(ini_opx))
     print("\n")
 
-    of.rotate_advance(100000000,ini_x,sen_data)
+    of.rotate_advance(50000000,ini_x)
+    of.diving()
 
 
 if __name__ == "__main__":
